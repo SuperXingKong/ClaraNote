@@ -16,6 +16,17 @@ ReviewReasonCode = Literal[
     "wrong_evidence",
     "other",
 ]
+IssueSeverity = Literal["warning", "error"]
+HallucinationCategory = Literal[
+    "unsupported_condition",
+    "unsupported_medication",
+    "unsupported_lab_trend",
+    "unsupported_symptom",
+    "unsupported_recommendation",
+    "incorrect_temporality",
+    "unsupported_claim",
+    "omission",
+]
 
 
 class InputType(str, Enum):
@@ -53,6 +64,7 @@ class ValidationResult(BaseModel):
     is_valid: bool
     errors: list[str] = Field(default_factory=list)
     warnings: list[str] = Field(default_factory=list)
+    issues: list[ValidationIssue] = Field(default_factory=list)
 
 
 class ResponseMetadata(BaseModel):
@@ -61,11 +73,24 @@ class ResponseMetadata(BaseModel):
     llm_provider: str
 
 
+class ValidationIssue(BaseModel):
+    code: HallucinationCategory | str
+    severity: IssueSeverity
+    message: str
+    section: str | None = None
+    evidence_ids: list[str] = Field(default_factory=list)
+
+
+class DraftDebugInfo(BaseModel):
+    first_pass_payload: object
+
+
 class DraftResponse(BaseModel):
     draft: ClinicalReviewDraft | None
     source_spans: list[SourceSpan]
     validation: ValidationResult
     metadata: ResponseMetadata
+    debug: DraftDebugInfo | None = None
 
 
 class ClinicianReviewRecord(BaseModel):

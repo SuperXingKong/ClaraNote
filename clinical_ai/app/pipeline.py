@@ -4,15 +4,24 @@ import re
 
 from clinical_ai.app.llm_client import LLMClient, MockLLMClient
 from clinical_ai.app.prompt import PROMPT_VERSION, build_prompt
-from clinical_ai.app.schemas import DraftResponse, ResponseMetadata, SourceSpan, ValidationResult
-from clinical_ai.app.validators import parse_draft, validate_all
+from clinical_ai.app.privacy import redact_payload
+from clinical_ai.app.safety_reviewer import SecondPassSafetyReviewer
+from clinical_ai.app.schemas import (
+    DraftDebugInfo,
+    DraftResponse,
+    ResponseMetadata,
+    SourceSpan,
+    ValidationResult,
+)
+from clinical_ai.app.validators import parse_draft
 
 
 class DraftPipeline:
     def __init__(self, llm_client: LLMClient | None = None) -> None:
         self.llm_client = llm_client or MockLLMClient()
+        self.safety_reviewer = SecondPassSafetyReviewer()
 
-    def process(self, raw_text: str) -> DraftResponse:
+    def process(self, raw_text: str, include_debug: bool = False) -> DraftResponse:
         source_spans = split_source_spans(raw_text)
         if not source_spans:
             return DraftResponse(
@@ -28,17 +37,26 @@ class DraftPipeline:
         prompt = build_prompt(raw_text=raw_text, source_spans=source_spans)
         payload = self.llm_client.generate(prompt=prompt, source_spans=source_spans)
         draft, parse_errors = parse_draft(payload)
-        validation = validate_all(draft=draft, source_spans=source_spans, raw_text=raw_text)
+        validation = self.safety_reviewer.review(
+            draft=draft,
+            source_spans=source_spans,
+            raw_text=raw_text,
+        )
 
         if parse_errors:
             validation.errors.extend(parse_errors)
             validation.is_valid = False
+
+        debug = None
+        if include_debug:
+            debug = DraftDebugInfo(first_pass_payload=redact_payload(payload))
 
         return DraftResponse(
             draft=draft,
             source_spans=source_spans,
             validation=validation,
             metadata=self._metadata(),
+            debug=debug,
         )
 
     def _metadata(self) -> ResponseMetadata:
