@@ -13,6 +13,7 @@ class Settings:
     openai_api_key: str | None
     openai_model: str = DEFAULT_OPENAI_MODEL
     openai_timeout_seconds: float = DEFAULT_OPENAI_TIMEOUT_SECONDS
+    cors_origins: tuple[str, ...] = ("http://localhost:5173",)
 
 
 def get_settings() -> Settings:
@@ -28,5 +29,9 @@ def get_settings() -> Settings:
         openai_api_key=os.getenv("OPENAI_API_KEY"),
         openai_model=os.getenv("OPENAI_MODEL", DEFAULT_OPENAI_MODEL),
         openai_timeout_seconds=timeout,
+        cors_origins=tuple(
+            origin.strip()
+            for origin in os.getenv("CORS_ORIGINS", "http://localhost:5173").split(",")
+            if origin.strip()
+        ),
     )
-
