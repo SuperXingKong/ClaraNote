@@ -47,6 +47,10 @@ python -m clinical_ai.app.evaluate
 
 The report runs the golden-case set and summarizes evidence coverage, hallucination-related issues, omission issues, unsafe directive issues, ambiguity failures, and human-in-the-loop review notes.
 
+## Frontend
+
+The safety-first review UI lives in [web](web/README.md). It provides the three-panel clinical review workspace, evidence highlighting, validation panel, review controls, and Playwright accessibility checks.
+
 ## MVP Scope
 
 The default `MockLLMClient` is deterministic and designed for local testing without an API key. Replace it with a real provider behind the `LLMClient` protocol when integrating an actual model.
