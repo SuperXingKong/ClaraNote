@@ -59,7 +59,9 @@ def _line_spans(text: str):
         start = cursor
         end = cursor + len(raw_line)
         cursor = end + 1
-        cleaned = raw_line.strip(" \t-*•")
+        cleaned = raw_line.strip(" \t-*")
+        if cleaned.startswith("\u2022"):
+            cleaned = cleaned[1:].strip()
         if cleaned:
             yield cleaned, start, end
 

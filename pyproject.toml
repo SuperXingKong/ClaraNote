@@ -5,9 +5,13 @@ description = "MVP clinical review draft generator with evidence mapping and saf
 requires-python = ">=3.11"
 dependencies = [
     "fastapi>=0.115.0",
+    "openai>=1.99.0",
     "pydantic>=2.0.0",
     "uvicorn>=0.30.0",
 ]
+
+[project.scripts]
+clinical-ai-openai-key-test = "clinical_ai.app.openai_key_test:main"
 
 [project.optional-dependencies]
 dev = [
@@ -18,4 +22,3 @@ dev = [
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
-
