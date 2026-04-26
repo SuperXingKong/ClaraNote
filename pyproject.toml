@@ -11,6 +11,7 @@ dependencies = [
 ]
 
 [project.scripts]
+clinical-ai-evaluate = "clinical_ai.app.evaluate:main"
 clinical-ai-openai-key-test = "clinical_ai.app.openai_key_test:main"
 
 [project.optional-dependencies]
