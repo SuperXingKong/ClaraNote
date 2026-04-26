@@ -40,6 +40,14 @@ class OpenAIClinicalReviewClient:
         self.timeout_seconds = timeout_seconds
         self._client = client
 
+    @property
+    def provider_name(self) -> str:
+        return "openai"
+
+    @property
+    def model_name(self) -> str:
+        return self.model
+
     def test_api_key(self) -> OpenAIKeyTestResult:
         if not self.api_key and self._client is None:
             return OpenAIKeyTestResult(

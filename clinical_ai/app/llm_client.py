@@ -13,6 +13,9 @@ class LLMClient(Protocol):
 class MockLLMClient:
     """Deterministic MVP client for tests and local demos without an API key."""
 
+    provider_name = "mock"
+    model_name = "mock-clinical-review-v1"
+
     def generate(self, prompt: str, source_spans: list[SourceSpan]) -> dict[str, Any]:
         del prompt
 
@@ -145,4 +148,3 @@ class MockLLMClient:
             ],
             "safety_note": "Draft for clinician review only. This output does not diagnose, prescribe, or replace clinical judgment.",
         }
-

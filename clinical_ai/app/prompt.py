@@ -3,6 +3,9 @@ from __future__ import annotations
 from clinical_ai.app.schemas import SourceSpan
 
 
+PROMPT_VERSION = "clinical-review-v1"
+
+
 SYSTEM_INSTRUCTIONS = """You are assisting a clinician by transforming a short patient summary into a structured review draft.
 
 Rules:
@@ -28,4 +31,3 @@ Return JSON matching this schema:
 def build_prompt(raw_text: str, source_spans: list[SourceSpan]) -> str:
     sources = "\n".join(f"{span.id}: {span.text}" for span in source_spans)
     return f"{SYSTEM_INSTRUCTIONS}\n\nSource spans:\n{sources}\n\nPatient summary:\n{raw_text}"
-

@@ -7,6 +7,15 @@ from pydantic import BaseModel, Field
 
 
 Confidence = Literal["low", "medium", "high"]
+ReviewDecision = Literal["accept", "edit", "reject"]
+ReviewReasonCode = Literal[
+    "factual_error",
+    "missing_risk_flag",
+    "unsafe_recommendation",
+    "unclear_wording",
+    "wrong_evidence",
+    "other",
+]
 
 
 class InputType(str, Enum):
@@ -46,7 +55,22 @@ class ValidationResult(BaseModel):
     warnings: list[str] = Field(default_factory=list)
 
 
+class ResponseMetadata(BaseModel):
+    prompt_version: str
+    model_version: str
+    llm_provider: str
+
+
 class DraftResponse(BaseModel):
     draft: ClinicalReviewDraft | None
     source_spans: list[SourceSpan]
     validation: ValidationResult
+    metadata: ResponseMetadata
+
+
+class ClinicianReviewRecord(BaseModel):
+    draft_id: str
+    decision: ReviewDecision
+    reason_codes: list[ReviewReasonCode] = Field(default_factory=list)
+    edited_text: str | None = None
+    comments: str | None = None

@@ -3,8 +3,8 @@ from __future__ import annotations
 import re
 
 from clinical_ai.app.llm_client import LLMClient, MockLLMClient
-from clinical_ai.app.prompt import build_prompt
-from clinical_ai.app.schemas import DraftResponse, SourceSpan, ValidationResult
+from clinical_ai.app.prompt import PROMPT_VERSION, build_prompt
+from clinical_ai.app.schemas import DraftResponse, ResponseMetadata, SourceSpan, ValidationResult
 from clinical_ai.app.validators import parse_draft, validate_all
 
 
@@ -22,6 +22,7 @@ class DraftPipeline:
                     is_valid=False,
                     errors=["raw_text has no usable clinical content."],
                 ),
+                metadata=self._metadata(),
             )
 
         prompt = build_prompt(raw_text=raw_text, source_spans=source_spans)
@@ -33,7 +34,19 @@ class DraftPipeline:
             validation.errors.extend(parse_errors)
             validation.is_valid = False
 
-        return DraftResponse(draft=draft, source_spans=source_spans, validation=validation)
+        return DraftResponse(
+            draft=draft,
+            source_spans=source_spans,
+            validation=validation,
+            metadata=self._metadata(),
+        )
+
+    def _metadata(self) -> ResponseMetadata:
+        return ResponseMetadata(
+            prompt_version=PROMPT_VERSION,
+            model_version=str(getattr(self.llm_client, "model_name", "unknown")),
+            llm_provider=str(getattr(self.llm_client, "provider_name", "unknown")),
+        )
 
 
 def split_source_spans(raw_text: str) -> list[SourceSpan]:
