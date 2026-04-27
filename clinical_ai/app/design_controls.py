@@ -18,6 +18,16 @@ HHS_HIPAA_DEIDENTIFICATION = DesignReference(
     authority="HHS",
     url="https://www.hhs.gov/hipaa/for-professionals/special-topics/de-identification/index.html",
 )
+HHS_HIPAA_MINIMUM_NECESSARY = DesignReference(
+    label="Minimum Necessary Requirement",
+    authority="HHS",
+    url="https://www.hhs.gov/hipaa/for-professionals/privacy/guidance/minimum-necessary-requirement/index.html",
+)
+HHS_HIPAA_AUDIT_PROTOCOL = DesignReference(
+    label="HIPAA Audit Protocol",
+    authority="HHS",
+    url="https://www.hhs.gov/hipaa/for-professionals/compliance-enforcement/audit/protocol/index.html",
+)
 NIST_AI_RMF = DesignReference(
     label="AI Risk Management Framework",
     authority="NIST",
@@ -210,6 +220,21 @@ DESIGN_CONTROLS = [
             "tests/test_privacy_gate.py",
         ],
         references=[HHS_HIPAA_DEIDENTIFICATION, NIST_AI_RMF],
+    ),
+    DesignControl(
+        feature_id="review_audit_retention",
+        title="Review audit retention policy",
+        summary="Redacted clinician review JSONL records are retained for a bounded local period and expired records are purged during review reads and writes.",
+        rationale=(
+            "HHS describes minimum necessary use and disclosure as a core HIPAA Privacy Rule protection, while "
+            "the HIPAA audit protocol expects regular review of information system activity records. Bounded "
+            "retention keeps the MVP useful for auditability without indefinite local accumulation."
+        ),
+        implemented_in=[
+            "clinical_ai/app/review_store.py",
+            "tests/test_review_store.py",
+        ],
+        references=[HHS_HIPAA_MINIMUM_NECESSARY, HHS_HIPAA_AUDIT_PROTOCOL],
     ),
 ]
 

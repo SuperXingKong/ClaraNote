@@ -119,6 +119,18 @@ Done:
 - Done: Return only redacted source spans for blocked requests.
 - Done: Test that the privacy gate blocks model calls and that redaction covers the detected identifier classes.
 
+### Completed Iteration: Review Audit Retention
+
+References:
+- HHS HIPAA Minimum Necessary Requirement: covered entities should limit use or disclosure of PHI to the minimum necessary for the intended purpose.
+- HHS HIPAA Audit Protocol: information system activity records such as audit logs should be regularly reviewed.
+
+Done:
+- Done: Add a default bounded retention period for redacted clinician review JSONL records.
+- Done: Purge expired review records automatically during review reads and writes.
+- Done: Keep current review API behavior unchanged for non-expired records.
+- Done: Test old-record purging and retention-disabled behavior.
+
 ## MVP Scope
 
 The default `MockLLMClient` is deterministic and designed for local testing without an API key. Replace it with a real provider behind the `LLMClient` protocol when integrating an actual model.

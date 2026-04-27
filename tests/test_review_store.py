@@ -1,9 +1,11 @@
+from datetime import datetime, timedelta, timezone
+
 from fastapi.testclient import TestClient
 
 from clinical_ai.app import api
 from clinical_ai.app.main import create_app
 from clinical_ai.app.review_store import JsonlReviewStore
-from clinical_ai.app.schemas import ReviewSubmissionRequest
+from clinical_ai.app.schemas import ClinicianReviewRecord, ReviewSubmissionRequest
 
 
 def test_review_store_redacts_and_lists_records(tmp_path):
@@ -45,3 +47,43 @@ def test_review_api_persists_records(tmp_path, monkeypatch):
     list_response = client.get("/v1/reviews")
     assert list_response.status_code == 200
     assert len(list_response.json()["reviews"]) == 1
+
+
+def test_review_store_purges_records_outside_retention_window(tmp_path):
+    path = tmp_path / "reviews.jsonl"
+    now = datetime(2026, 4, 27, tzinfo=timezone.utc)
+    old_record = ClinicianReviewRecord(
+        draft_id="old",
+        item_key="summary-0",
+        decision="accept",
+        created_at=now - timedelta(days=31),
+    )
+    current_record = ClinicianReviewRecord(
+        draft_id="current",
+        item_key="summary-1",
+        decision="accept",
+        created_at=now - timedelta(days=2),
+    )
+    path.write_text(old_record.model_dump_json() + "\n" + current_record.model_dump_json() + "\n", encoding="utf-8")
+    store = JsonlReviewStore(path, retention_days=30)
+
+    removed_count = store.purge_expired(now=now)
+
+    assert removed_count == 1
+    retained_records = JsonlReviewStore(path, retention_days=None).list()
+    assert [record.draft_id for record in retained_records] == ["current"]
+
+
+def test_review_store_can_disable_retention_for_tests(tmp_path):
+    path = tmp_path / "reviews.jsonl"
+    old_record = ClinicianReviewRecord(
+        draft_id="old",
+        item_key="summary-0",
+        decision="accept",
+        created_at=datetime(2020, 1, 1, tzinfo=timezone.utc),
+    )
+    path.write_text(old_record.model_dump_json() + "\n", encoding="utf-8")
+    store = JsonlReviewStore(path, retention_days=None)
+
+    assert store.purge_expired() == 0
+    assert len(store.list()) == 1

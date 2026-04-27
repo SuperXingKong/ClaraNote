@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from clinical_ai.app.privacy import redact_text
@@ -8,13 +9,20 @@ from clinical_ai.app.schemas import ClinicianReviewRecord, ReviewSubmissionReque
 
 
 DEFAULT_REVIEW_LOG_PATH = Path(".data/reviews.jsonl")
+DEFAULT_REVIEW_RETENTION_DAYS = 30
 
 
 class JsonlReviewStore:
-    def __init__(self, path: Path | str = DEFAULT_REVIEW_LOG_PATH) -> None:
+    def __init__(
+        self,
+        path: Path | str = DEFAULT_REVIEW_LOG_PATH,
+        retention_days: int | None = DEFAULT_REVIEW_RETENTION_DAYS,
+    ) -> None:
         self.path = Path(path)
+        self.retention_days = retention_days
 
     def add(self, request: ReviewSubmissionRequest) -> ClinicianReviewRecord:
+        self.purge_expired()
         record = ClinicianReviewRecord(
             draft_id=request.draft_id,
             item_key=request.item_key,
@@ -29,6 +37,29 @@ class JsonlReviewStore:
         return record
 
     def list(self, limit: int = 100) -> list[ClinicianReviewRecord]:
+        self.purge_expired()
+        rows = self._read_all()
+
+        if limit <= 0:
+            return []
+        return rows[-limit:]
+
+    def purge_expired(self, now: datetime | None = None) -> int:
+        if self.retention_days is None or not self.path.exists():
+            return 0
+
+        current_time = now or datetime.now(timezone.utc)
+        cutoff = current_time - timedelta(days=self.retention_days)
+        rows = self._read_all()
+        retained = [record for record in rows if record.created_at >= cutoff]
+        removed_count = len(rows) - len(retained)
+
+        if removed_count:
+            self._write_all(retained)
+
+        return removed_count
+
+    def _read_all(self) -> list[ClinicianReviewRecord]:
         if not self.path.exists():
             return []
 
@@ -39,7 +70,10 @@ class JsonlReviewStore:
                 if not stripped:
                     continue
                 rows.append(ClinicianReviewRecord.model_validate(json.loads(stripped)))
+        return rows
 
-        if limit <= 0:
-            return []
-        return rows[-limit:]
+    def _write_all(self, rows: list[ClinicianReviewRecord]) -> None:
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        with self.path.open("w", encoding="utf-8") as handle:
+            for row in rows:
+                handle.write(row.model_dump_json() + "\n")
