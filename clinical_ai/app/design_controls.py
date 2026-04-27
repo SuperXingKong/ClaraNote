@@ -33,6 +33,21 @@ NIST_AI_RMF = DesignReference(
     authority="NIST",
     url="https://www.nist.gov/itl/ai-risk-management-framework",
 )
+PERPLEXITY_QUICKSTART = DesignReference(
+    label="Perplexity API Quickstart",
+    authority="Perplexity",
+    url="https://docs.perplexity.ai/docs/getting-started/quickstart",
+)
+PERPLEXITY_OUTPUT_CONTROL = DesignReference(
+    label="Perplexity Output Control",
+    authority="Perplexity",
+    url="https://docs.perplexity.ai/docs/agent-api/output-control",
+)
+AIS_ATTRIBUTION = DesignReference(
+    label="Measuring Attribution in Natural Language Generation Models",
+    authority="arXiv",
+    url="https://arxiv.org/abs/2112.12870",
+)
 HL7_FHIR_R4_BUNDLE = DesignReference(
     label="FHIR R4 Bundle",
     authority="HL7",
@@ -235,6 +250,22 @@ DESIGN_CONTROLS = [
             "tests/test_review_store.py",
         ],
         references=[HHS_HIPAA_MINIMUM_NECESSARY, HHS_HIPAA_AUDIT_PROTOCOL],
+    ),
+    DesignControl(
+        feature_id="citation_sized_source_spans",
+        title="Citation-sized source spans",
+        summary="Source spans are grouped into clinically meaningful sections and low-information headings are not exposed as standalone evidence.",
+        rationale=(
+            "Perplexity-style grounded answers separate model text from structured source data such as citations, "
+            "annotations, and search results, and warn against relying on model-generated links. AIS evaluates "
+            "whether generated statements are supported by identified sources. The MVP therefore uses source spans "
+            "that are concise enough to inspect but complete enough to support a clinical claim."
+        ),
+        implemented_in=[
+            "clinical_ai/app/pipeline.py",
+            "tests/test_source_spans.py",
+        ],
+        references=[PERPLEXITY_QUICKSTART, PERPLEXITY_OUTPUT_CONTROL, AIS_ATTRIBUTION],
     ),
 ]
 

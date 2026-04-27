@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from dataclasses import dataclass
 
 from clinical_ai.app.llm_client import LLMClient, MockLLMClient
 from clinical_ai.app.prompt import PROMPT_VERSION, build_prompt
@@ -15,6 +16,14 @@ from clinical_ai.app.schemas import (
     ValidationResult,
 )
 from clinical_ai.app.validators import parse_draft
+
+
+@dataclass(frozen=True)
+class LineUnit:
+    text: str
+    start: int
+    end: int
+    is_heading: bool
 
 
 class DraftPipeline:
@@ -94,13 +103,14 @@ class DraftPipeline:
 
 
 def split_source_spans(raw_text: str) -> list[SourceSpan]:
-    """Split input into auditable source spans while preserving offsets."""
+    """Split input into citation-sized source spans while preserving offsets."""
     normalized = raw_text.strip()
     if not normalized:
         return []
 
-    candidates = list(_line_spans(normalized))
-    if len(candidates) <= 1:
+    line_units = list(_line_units(normalized))
+    candidates = list(_section_spans(line_units))
+    if not candidates:
         candidates = list(_sentence_spans(normalized))
 
     return [
@@ -110,21 +120,108 @@ def split_source_spans(raw_text: str) -> list[SourceSpan]:
     ]
 
 
-def _line_spans(text: str):
+def _line_units(text: str) -> list[LineUnit]:
+    units: list[LineUnit] = []
     cursor = 0
     for raw_line in text.splitlines():
         start = cursor
         end = cursor + len(raw_line)
         cursor = end + 1
-        cleaned = raw_line.strip(" \t-*")
-        if cleaned.startswith("\u2022"):
-            cleaned = cleaned[1:].strip()
+        cleaned = _clean_line(raw_line)
         if cleaned:
-            yield cleaned, start, end
+            units.append(
+                LineUnit(
+                    text=cleaned,
+                    start=start,
+                    end=end,
+                    is_heading=_looks_like_heading(cleaned),
+                )
+            )
+    return units
+
+
+def _section_spans(units: list[LineUnit]) -> list[tuple[str, int, int]]:
+    if not units:
+        return []
+
+    if not any(unit.is_heading for unit in units):
+        if len(units) <= 1:
+            return []
+        return [(unit.text, unit.start, unit.end) for unit in units if _is_informative_text(unit.text)]
+
+    sections: list[tuple[list[str], int, int]] = []
+    pending_heading: LineUnit | None = None
+    current_lines: list[str] = []
+    current_start = 0
+    current_end = 0
+
+    def flush_current() -> None:
+        nonlocal current_lines, current_start, current_end
+        if current_lines and any(_is_informative_text(line) for line in current_lines):
+            sections.append((current_lines, current_start, current_end))
+        current_lines = []
+        current_start = 0
+        current_end = 0
+
+    for unit in units:
+        if unit.is_heading:
+            flush_current()
+            pending_heading = unit
+            continue
+
+        if pending_heading is not None:
+            current_lines = [pending_heading.text, unit.text]
+            current_start = pending_heading.start
+            current_end = unit.end
+            pending_heading = None
+        elif current_lines:
+            current_lines.append(unit.text)
+            current_end = unit.end
+        else:
+            current_lines = [unit.text]
+            current_start = unit.start
+            current_end = unit.end
+
+    flush_current()
+
+    return [
+        (_format_section_text(lines), start, end)
+        for lines, start, end in sections
+        if _is_informative_text(_format_section_text(lines))
+    ]
+
+
+def _clean_line(raw_line: str) -> str:
+    cleaned = raw_line.strip(" \t-*")
+    if cleaned.startswith("\u2022"):
+        cleaned = cleaned[1:].strip()
+    return cleaned
+
+
+def _looks_like_heading(text: str) -> bool:
+    return text.endswith(":")
+
+
+def _is_informative_text(text: str) -> bool:
+    stripped = text.strip()
+    if not stripped:
+        return False
+    if _looks_like_heading(stripped):
+        return False
+    return bool(re.search(r"[A-Za-z0-9]", stripped))
+
+
+def _format_section_text(lines: list[str]) -> str:
+    if len(lines) <= 1:
+        return "".join(lines)
+    heading, *body = lines
+    if _looks_like_heading(heading):
+        return heading + "\n" + "\n".join(body)
+    return "\n".join(lines)
 
 
 def _sentence_spans(text: str):
-    for match in re.finditer(r"[^.!?\n]+(?:[.!?]|$)", text):
+    for match in re.finditer(r".+?(?:[.!?](?=\s|$)|$)", text):
         sentence = match.group(0).strip()
         if sentence:
             yield sentence, match.start(), match.end()

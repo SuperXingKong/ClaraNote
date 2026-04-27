@@ -131,6 +131,19 @@ Done:
 - Done: Keep current review API behavior unchanged for non-expired records.
 - Done: Test old-record purging and retention-disabled behavior.
 
+### Completed Iteration: Citation-sized Source Spans
+
+References:
+- Perplexity API Quickstart: web-grounded answers expose citations and search results separately from generated text.
+- Perplexity Output Control: valid source links should come from API citation/search-result fields rather than being generated inside model output.
+- AIS attribution framework: generated statements should be evaluated against identified supporting sources.
+
+Done:
+- Done: Replace line-by-line source span splitting with section-aware citation chunks.
+- Done: Keep headings such as `Latest labs:` as context inside a section, but do not expose heading-only lines as standalone evidence.
+- Done: Preserve source offsets and stable `S1`, `S2`, ... IDs.
+- Done: Test assignment-style spans, heading-only filtering, and single-paragraph sentence fallback.
+
 ## MVP Scope
 
 The default `MockLLMClient` is deterministic and designed for local testing without an API key. Replace it with a real provider behind the `LLMClient` protocol when integrating an actual model.
