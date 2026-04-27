@@ -93,6 +93,20 @@ Done:
 - Done: Display the evaluation metrics in the existing frontend report card without showing source references.
 - Done: Test the endpoint and the frontend rendering path.
 
+### Completed Iteration: FHIR Bundle Input Adapter
+
+References:
+- HL7 FHIR R4 Bundle: Bundle is the resource container used to group clinical resources for exchange.
+- HL7 FHIR R4 Observation: observations represent measurements and simple assertions such as labs and symptoms.
+- HL7 FHIR R4 MedicationStatement: medication statements represent reported medication use and may be incomplete or patient-reported.
+- HL7 FHIR R4 Condition: conditions represent problems, diagnoses, or clinically relevant concerns.
+
+Done:
+- Done: Add a backend adapter for Patient, Condition, Observation, and MedicationStatement resources in a FHIR Bundle.
+- Done: Add `POST /v1/drafts/fhir` so structured bundles can run through the same source-span, prompt, validation, and safety pipeline.
+- Done: Preserve FHIR resource IDs and multi-clinic provenance inside generated source text for evidence review.
+- Done: Test valid assignment-style FHIR input and invalid bundle handling.
+
 ## MVP Scope
 
 The default `MockLLMClient` is deterministic and designed for local testing without an API key. Replace it with a real provider behind the `LLMClient` protocol when integrating an actual model.

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Literal
+from typing import Any, Literal
 from datetime import datetime, timezone
 
 from pydantic import BaseModel, Field
@@ -32,10 +32,15 @@ HallucinationCategory = Literal[
 
 class InputType(str, Enum):
     PLAIN_TEXT = "plain_text"
+    FHIR_BUNDLE = "fhir_bundle"
 
 
 class DraftRequest(BaseModel):
     raw_text: str = Field(..., min_length=1)
+
+
+class FhirDraftRequest(BaseModel):
+    bundle: dict[str, Any]
 
 
 class SourceSpan(BaseModel):

@@ -13,6 +13,26 @@ FDA_GMLP = DesignReference(
     authority="FDA",
     url="https://www.fda.gov/medical-devices/software-medical-device-samd/good-machine-learning-practice-medical-device-development-guiding-principles",
 )
+HL7_FHIR_R4_BUNDLE = DesignReference(
+    label="FHIR R4 Bundle",
+    authority="HL7",
+    url="https://www.hl7.org/fhir/R4/bundle.html",
+)
+HL7_FHIR_R4_OBSERVATION = DesignReference(
+    label="FHIR R4 Observation",
+    authority="HL7",
+    url="https://www.hl7.org/fhir/R4/observation.html",
+)
+HL7_FHIR_R4_MEDICATION_STATEMENT = DesignReference(
+    label="FHIR R4 MedicationStatement",
+    authority="HL7",
+    url="https://www.hl7.org/fhir/R4/medicationstatement.html",
+)
+HL7_FHIR_R4_CONDITION = DesignReference(
+    label="FHIR R4 Condition",
+    authority="HL7",
+    url="https://www.hl7.org/fhir/R4/condition.html",
+)
 WHO_LMM = DesignReference(
     label="Ethics and governance guidance for large multi-modal models, 2024",
     authority="WHO",
@@ -142,6 +162,28 @@ DESIGN_CONTROLS = [
             "web/src/features/evaluation/EvaluationReportView.tsx",
         ],
         references=[FDA_GMLP, CHAI_RAIG, CREOLA],
+    ),
+    DesignControl(
+        feature_id="fhir_bundle_input",
+        title="FHIR Bundle input adapter",
+        summary="A lightweight backend endpoint accepts FHIR Bundle JSON and normalizes Patient, Condition, Observation, and MedicationStatement resources into auditable source text.",
+        rationale=(
+            "HL7 FHIR defines Bundle as a container for resources, Observation for measurements and assertions, "
+            "MedicationStatement for reported medication use, and Condition for problems or diagnoses. Mapping "
+            "these resources into source spans lets the MVP move toward structured clinical inputs without "
+            "claiming real EHR integration."
+        ),
+        implemented_in=[
+            "clinical_ai/app/fhir_adapter.py",
+            "clinical_ai/app/api.py",
+            "tests/test_fhir_adapter.py",
+        ],
+        references=[
+            HL7_FHIR_R4_BUNDLE,
+            HL7_FHIR_R4_OBSERVATION,
+            HL7_FHIR_R4_MEDICATION_STATEMENT,
+            HL7_FHIR_R4_CONDITION,
+        ],
     ),
 ]
 
