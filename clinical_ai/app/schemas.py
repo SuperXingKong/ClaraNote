@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from enum import Enum
 from typing import Literal
+from datetime import datetime, timezone
 
 from pydantic import BaseModel, Field
 
@@ -95,10 +96,29 @@ class DraftResponse(BaseModel):
 
 class ClinicianReviewRecord(BaseModel):
     draft_id: str
+    item_key: str
     decision: ReviewDecision
     reason_codes: list[ReviewReasonCode] = Field(default_factory=list)
     edited_text: str | None = None
     comments: str | None = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class ReviewSubmissionRequest(BaseModel):
+    draft_id: str = "current-draft"
+    item_key: str
+    decision: ReviewDecision
+    reason_codes: list[ReviewReasonCode] = Field(default_factory=list)
+    edited_text: str | None = None
+    comments: str | None = None
+
+
+class ReviewSubmissionResponse(BaseModel):
+    review: ClinicianReviewRecord
+
+
+class ReviewListResponse(BaseModel):
+    reviews: list[ClinicianReviewRecord]
 
 
 class DesignReference(BaseModel):

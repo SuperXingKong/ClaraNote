@@ -9,6 +9,23 @@ test.beforeEach(async ({ page }) => {
       body: JSON.stringify(mockDraftResponse),
     });
   });
+  await page.route("**/v1/reviews", async (route) => {
+    const request = route.request().postDataJSON();
+    await route.fulfill({
+      contentType: "application/json",
+      body: JSON.stringify({
+        review: {
+          draft_id: request.draft_id,
+          item_key: request.item_key,
+          decision: request.decision,
+          reason_codes: request.reason_codes,
+          comments: request.comments,
+          edited_text: null,
+          created_at: "2026-04-27T00:00:00Z",
+        },
+      }),
+    });
+  });
 });
 
 test("runs assignment sample and highlights evidence", async ({ page }) => {
@@ -32,6 +49,7 @@ test("records frontend-only review decisions", async ({ page }) => {
   await page.getByRole("button", { name: "Accept" }).first().click();
 
   await expect(page.getByText("accept").first()).toBeVisible();
+  await expect(page.getByText("saved").first()).toBeVisible();
 
   await page.getByRole("button", { name: "Wrong evidence" }).first().click();
   await expect(page.getByText("edit").first()).toBeVisible();

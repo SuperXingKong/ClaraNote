@@ -68,6 +68,19 @@ Every new feature must include authoritative references before implementation. T
 - TODO: Show the references in the frontend so reviewers can see why evidence mapping, uncertainty handling, safety review, human review, and accessibility controls exist.
 - TODO: Test that the API returns references and the UI renders them.
 
+### Iteration TODO: Persisted Clinician Review Feedback
+
+References:
+- FDA Clinical Decision Support Software guidance: HCPs should be able to independently review the basis of recommendations.
+- WHO LMM health guidance: health AI should include human oversight and governance.
+- CHAI Responsible AI Guide: transparency and accountability are part of responsible health AI lifecycle practice.
+
+TODO:
+- TODO: Add a backend review submission API for `accept`, `edit`, and `reject` decisions.
+- TODO: Persist review records locally as redacted JSONL so reviewer feedback can be audited without storing raw secrets.
+- TODO: Wire frontend review controls to submit records to the backend while keeping local UI feedback.
+- TODO: Test review storage, API submission, and frontend request behavior.
+
 ## MVP Scope
 
 The default `MockLLMClient` is deterministic and designed for local testing without an API key. Replace it with a real provider behind the `LLMClient` protocol when integrating an actual model.

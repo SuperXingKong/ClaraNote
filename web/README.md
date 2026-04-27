@@ -55,6 +55,7 @@ npm run test:a11y
 - Done: Status badges for valid, needs review, missing evidence, unsafe, and ambiguity states.
 - Done: Uncertainty styling that uses icon and text in addition to color.
 - Done: Frontend-only review controls and reason dialog aligned to backend reason codes.
+- Done: Review controls submit redacted review records to the backend audit API.
 - Done: API client for `POST /v1/drafts` with loading and error states.
 - Done: Optional evaluation report view that points to the backend report command.
 - Done: Responsive desktop, tablet, and mobile layout behavior.

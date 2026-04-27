@@ -94,13 +94,15 @@ DESIGN_CONTROLS = [
     DesignControl(
         feature_id="human_review_controls",
         title="Human-in-the-loop review controls",
-        summary="Reviewers can accept, edit, reject, mark wrong evidence, and mark missing risk.",
+        summary="Reviewers can accept, edit, reject, mark wrong evidence, and mark missing risk, with backend audit records.",
         rationale=(
             "WHO recommends stakeholder engagement and oversight across development and deployment. "
-            "The UI records human review decisions to reduce automation-bias risk."
+            "The UI and API record human review decisions to reduce automation-bias risk and support accountability."
         ),
         implemented_in=[
             "clinical_ai/app/schemas.py",
+            "clinical_ai/app/review_store.py",
+            "clinical_ai/app/api.py",
             "web/src/features/review/ReviewControls.tsx",
             "web/src/features/review/ReviewReasonDialog.tsx",
         ],

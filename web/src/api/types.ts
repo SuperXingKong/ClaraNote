@@ -76,6 +76,29 @@ export type ReviewState = {
   comments?: string;
 };
 
+export type ReviewSubmissionRequest = {
+  draft_id: string;
+  item_key: string;
+  decision: ReviewDecision;
+  reason_codes: ReviewReasonCode[];
+  edited_text?: string | null;
+  comments?: string | null;
+};
+
+export type ClinicianReviewRecord = {
+  draft_id: string;
+  item_key: string;
+  decision: ReviewDecision;
+  reason_codes: ReviewReasonCode[];
+  edited_text?: string | null;
+  comments?: string | null;
+  created_at: string;
+};
+
+export type ReviewSubmissionResponse = {
+  review: ClinicianReviewRecord;
+};
+
 export type DesignReference = {
   label: string;
   authority: string;

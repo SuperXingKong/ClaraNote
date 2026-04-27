@@ -14,6 +14,7 @@ def test_response_includes_prompt_and_model_metadata():
 def test_clinician_review_record_accepts_reason_codes():
     record = ClinicianReviewRecord(
         draft_id="draft-1",
+        item_key="summary-0",
         decision="edit",
         reason_codes=["wrong_evidence", "unclear_wording"],
         comments="Evidence citation should be clearer.",
@@ -38,4 +39,3 @@ def test_redact_payload_recurses_nested_structures():
     payload = {"comments": ["contact me at user@example.com"]}
 
     assert redact_payload(payload) == {"comments": ["contact me at [REDACTED_EMAIL]"]}
-

@@ -27,10 +27,9 @@ def test_assignment_report_contains_safety_summary():
 
 def test_clinician_edit_rate_counts_edit_and_reject():
     records = [
-        ClinicianReviewRecord(draft_id="1", decision="accept"),
-        ClinicianReviewRecord(draft_id="2", decision="edit"),
-        ClinicianReviewRecord(draft_id="3", decision="reject"),
+        ClinicianReviewRecord(draft_id="1", item_key="summary-0", decision="accept"),
+        ClinicianReviewRecord(draft_id="2", item_key="summary-1", decision="edit"),
+        ClinicianReviewRecord(draft_id="3", item_key="summary-2", decision="reject"),
     ]
 
     assert compute_clinician_edit_rate(records) == 2 / 3
-
