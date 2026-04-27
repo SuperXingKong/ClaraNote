@@ -43,6 +43,11 @@ class EvaluationRunResult(BaseModel):
     case_results: list[GoldenCaseResult]
 
 
+class EvaluationReportResponse(BaseModel):
+    result: EvaluationRunResult
+    report_markdown: str
+
+
 DEFAULT_GOLDEN_CASES = [
     GoldenCase(
         case_id="assignment_full",

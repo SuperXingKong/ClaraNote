@@ -8,6 +8,11 @@ FDA_CDS = DesignReference(
     authority="FDA",
     url="https://www.fda.gov/regulatory-information/search-fda-guidance-documents/clinical-decision-support-software",
 )
+FDA_GMLP = DesignReference(
+    label="Good Machine Learning Practice for Medical Device Development",
+    authority="FDA",
+    url="https://www.fda.gov/medical-devices/software-medical-device-samd/good-machine-learning-practice-medical-device-development-guiding-principles",
+)
 WHO_LMM = DesignReference(
     label="Ethics and governance guidance for large multi-modal models, 2024",
     authority="WHO",
@@ -122,6 +127,21 @@ DESIGN_CONTROLS = [
             "web/tests/a11y.spec.ts",
         ],
         references=[WCAG_22],
+    ),
+    DesignControl(
+        feature_id="evaluation_reporting",
+        title="Golden-case evaluation reporting",
+        summary="The backend exposes lifecycle evaluation metrics and a markdown report for the safety-first summarisation workflow.",
+        rationale=(
+            "FDA GMLP emphasizes total product lifecycle thinking for AI/ML systems. CHAI and CREOLA "
+            "support explicit testing, monitoring, and reporting of safety-relevant failure modes."
+        ),
+        implemented_in=[
+            "clinical_ai/app/evaluation.py",
+            "clinical_ai/app/api.py",
+            "web/src/features/evaluation/EvaluationReportView.tsx",
+        ],
+        references=[FDA_GMLP, CHAI_RAIG, CREOLA],
     ),
 ]
 

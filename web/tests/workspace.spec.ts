@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { mockDraftResponse } from "./fixtures/draftResponse";
+import { mockDraftResponse, mockEvaluationReportResponse } from "./fixtures/draftResponse";
 
 test.beforeEach(async ({ page }) => {
   await page.route("**/v1/drafts", async (route) => {
@@ -26,6 +26,12 @@ test.beforeEach(async ({ page }) => {
       }),
     });
   });
+  await page.route("**/v1/evaluation", async (route) => {
+    await route.fulfill({
+      contentType: "application/json",
+      body: JSON.stringify(mockEvaluationReportResponse),
+    });
+  });
 });
 
 test("runs assignment sample and highlights evidence", async ({ page }) => {
@@ -36,6 +42,8 @@ test("runs assignment sample and highlights evidence", async ({ page }) => {
 
   await expect(page.getByText("HbA1c increased from 7.8%")).toBeVisible();
   await expect(page.getByText("Fasting glucose recency is unclear")).toBeVisible();
+  await expect(page.getByText("Backend report")).toBeVisible();
+  await expect(page.locator('[aria-label="Evaluation metrics"]').getByText("Evidence")).toBeVisible();
 
   await page.getByRole("button", { name: "S3" }).first().click();
   await expect(page.getByRole("button", { name: /S3 Fasting glucose/ })).toBeVisible();

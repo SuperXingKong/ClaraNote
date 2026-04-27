@@ -3,6 +3,11 @@ from __future__ import annotations
 from fastapi import APIRouter
 
 from clinical_ai.app.design_controls import get_design_controls
+from clinical_ai.app.evaluation import (
+    EvaluationReportResponse,
+    evaluate_golden_cases,
+    generate_assignment_report,
+)
 from clinical_ai.app.pipeline import DraftPipeline
 from clinical_ai.app.review_store import JsonlReviewStore
 from clinical_ai.app.schemas import (
@@ -38,3 +43,12 @@ async def create_review(request: ReviewSubmissionRequest) -> ReviewSubmissionRes
 @router.get("/v1/reviews", response_model=ReviewListResponse)
 async def list_reviews(limit: int = 100) -> ReviewListResponse:
     return ReviewListResponse(reviews=review_store.list(limit=limit))
+
+
+@router.get("/v1/evaluation", response_model=EvaluationReportResponse)
+async def read_evaluation_report() -> EvaluationReportResponse:
+    result = evaluate_golden_cases()
+    return EvaluationReportResponse(
+        result=result,
+        report_markdown=generate_assignment_report(result),
+    )

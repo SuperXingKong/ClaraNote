@@ -83,3 +83,21 @@ export const mockDraftResponse: DraftResponse = {
   },
   debug: null,
 };
+
+export const mockEvaluationReportResponse = {
+  result: {
+    metrics: {
+      total_cases: 5,
+      valid_cases: 1,
+      hallucination_issue_count: 2,
+      omission_issue_count: 0,
+      unsafe_directive_count: 0,
+      ambiguity_failure_count: 0,
+      evidence_issue_count: 1,
+      evidence_coverage_rate: 1,
+      clinician_edit_rate: null,
+    },
+    case_results: [],
+  },
+  report_markdown: "# Safety-first Clinical Summarization Evaluation",
+};

@@ -117,3 +117,36 @@ export type DesignControl = {
 export type DesignControlsResponse = {
   controls: DesignControl[];
 };
+
+export type EvaluationMetrics = {
+  total_cases: number;
+  valid_cases: number;
+  hallucination_issue_count: number;
+  omission_issue_count: number;
+  unsafe_directive_count: number;
+  ambiguity_failure_count: number;
+  evidence_issue_count: number;
+  evidence_coverage_rate: number;
+  clinician_edit_rate: number | null;
+};
+
+export type GoldenCaseResult = {
+  case_id: string;
+  description: string;
+  is_valid: boolean;
+  errors: string[];
+  warnings: string[];
+  issue_codes: string[];
+  missing_expected_terms: string[];
+  present_forbidden_terms: string[];
+};
+
+export type EvaluationRunResult = {
+  metrics: EvaluationMetrics;
+  case_results: GoldenCaseResult[];
+};
+
+export type EvaluationReportResponse = {
+  result: EvaluationRunResult;
+  report_markdown: string;
+};

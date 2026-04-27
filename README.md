@@ -61,25 +61,37 @@ Every new feature must include authoritative references before implementation. T
 4. Code and tests implementing the TODO.
 5. A commit whose scope matches the completed iteration.
 
-### Current TODO: Research-backed Design Controls
+### Completed Iteration: Research-backed Design Controls
 
-- TODO: Add backend design-control metadata that maps each safety feature to authoritative references.
-- TODO: Expose design controls through a read-only API endpoint.
-- TODO: Show the references in the frontend so reviewers can see why evidence mapping, uncertainty handling, safety review, human review, and accessibility controls exist.
-- TODO: Test that the API returns references and the UI renders them.
+- Done: Add backend design-control metadata that maps each safety feature to authoritative references.
+- Done: Expose design controls through a read-only API endpoint.
+- Done: Keep references internal to README/API metadata rather than displaying them in the frontend.
+- Done: Test that the API returns authoritative references.
 
-### Iteration TODO: Persisted Clinician Review Feedback
+### Completed Iteration: Persisted Clinician Review Feedback
 
 References:
 - FDA Clinical Decision Support Software guidance: HCPs should be able to independently review the basis of recommendations.
 - WHO LMM health guidance: health AI should include human oversight and governance.
 - CHAI Responsible AI Guide: transparency and accountability are part of responsible health AI lifecycle practice.
 
-TODO:
-- TODO: Add a backend review submission API for `accept`, `edit`, and `reject` decisions.
-- TODO: Persist review records locally as redacted JSONL so reviewer feedback can be audited without storing raw secrets.
-- TODO: Wire frontend review controls to submit records to the backend while keeping local UI feedback.
-- TODO: Test review storage, API submission, and frontend request behavior.
+Done:
+- Done: Add a backend review submission API for `accept`, `edit`, and `reject` decisions.
+- Done: Persist review records locally as redacted JSONL so reviewer feedback can be audited without storing raw secrets.
+- Done: Wire frontend review controls to submit records to the backend while keeping local UI feedback.
+- Done: Test review storage, API submission, and frontend request behavior.
+
+### Completed Iteration: Evaluation Report API
+
+References:
+- FDA Good Machine Learning Practice: AI/ML systems should be considered across the total product lifecycle.
+- CHAI Responsible AI Guide: responsible health AI requires lifecycle testing, monitoring, reporting, and accountability.
+- CREOLA: clinical summarisation should track hallucinations, omissions, and safety-relevant errors.
+
+Done:
+- Done: Add a backend endpoint that returns golden-case evaluation metrics and a markdown report.
+- Done: Display the evaluation metrics in the existing frontend report card without showing source references.
+- Done: Test the endpoint and the frontend rendering path.
 
 ## MVP Scope
 

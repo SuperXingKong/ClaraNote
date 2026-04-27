@@ -1,13 +1,19 @@
 import { AxeBuilder } from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
-import { mockDraftResponse } from "./fixtures/draftResponse";
+import { mockDraftResponse, mockEvaluationReportResponse } from "./fixtures/draftResponse";
 
 test.beforeEach(async ({ page }) => {
   await page.route("**/v1/drafts", async (route) => {
     await route.fulfill({
       contentType: "application/json",
       body: JSON.stringify(mockDraftResponse),
+    });
+  });
+  await page.route("**/v1/evaluation", async (route) => {
+    await route.fulfill({
+      contentType: "application/json",
+      body: JSON.stringify(mockEvaluationReportResponse),
     });
   });
 });

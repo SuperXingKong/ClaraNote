@@ -58,6 +58,7 @@ npm run test:a11y
 - Done: Review controls submit redacted review records to the backend audit API.
 - Done: API client for `POST /v1/drafts` with loading and error states.
 - Done: Optional evaluation report view that points to the backend report command.
+- Done: Evaluation report view loads backend golden-case metrics when the backend is running.
 - Done: Responsive desktop, tablet, and mobile layout behavior.
 - Done: Playwright tests for assignment flow, evidence highlighting, review controls, and mobile layout.
 - Done: axe accessibility smoke test for the main workspace.
