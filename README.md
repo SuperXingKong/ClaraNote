@@ -51,6 +51,23 @@ The report runs the golden-case set and summarizes evidence coverage, hallucinat
 
 The safety-first review UI lives in [web](web/README.md). It provides the three-panel clinical review workspace, evidence highlighting, validation panel, review controls, and Playwright accessibility checks.
 
+## Iteration Rule: Reference-backed Features
+
+Every new feature must include authoritative references before implementation. The expected loop is:
+
+1. Research papers, medical authorities, standards bodies, or official vendor documentation.
+2. A short design rationale tied to the assignment risk being addressed.
+3. TODOs in README or web README.
+4. Code and tests implementing the TODO.
+5. A commit whose scope matches the completed iteration.
+
+### Current TODO: Research-backed Design Controls
+
+- TODO: Add backend design-control metadata that maps each safety feature to authoritative references.
+- TODO: Expose design controls through a read-only API endpoint.
+- TODO: Show the references in the frontend so reviewers can see why evidence mapping, uncertainty handling, safety review, human review, and accessibility controls exist.
+- TODO: Test that the API returns references and the UI renders them.
+
 ## MVP Scope
 
 The default `MockLLMClient` is deterministic and designed for local testing without an API key. Replace it with a real provider behind the `LLMClient` protocol when integrating an actual model.

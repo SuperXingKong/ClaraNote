@@ -75,3 +75,22 @@ export type ReviewState = {
   reasonCodes: ReviewReasonCode[];
   comments?: string;
 };
+
+export type DesignReference = {
+  label: string;
+  authority: string;
+  url: string;
+};
+
+export type DesignControl = {
+  feature_id: string;
+  title: string;
+  summary: string;
+  rationale: string;
+  implemented_in: string[];
+  references: DesignReference[];
+};
+
+export type DesignControlsResponse = {
+  controls: DesignControl[];
+};

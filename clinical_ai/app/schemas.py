@@ -99,3 +99,22 @@ class ClinicianReviewRecord(BaseModel):
     reason_codes: list[ReviewReasonCode] = Field(default_factory=list)
     edited_text: str | None = None
     comments: str | None = None
+
+
+class DesignReference(BaseModel):
+    label: str
+    authority: str
+    url: str
+
+
+class DesignControl(BaseModel):
+    feature_id: str
+    title: str
+    summary: str
+    rationale: str
+    implemented_in: list[str] = Field(default_factory=list)
+    references: list[DesignReference]
+
+
+class DesignControlsResponse(BaseModel):
+    controls: list[DesignControl]

@@ -33,6 +33,17 @@ export async function postJson<TRequest, TResponse>(
   return (await response.json()) as TResponse;
 }
 
+export async function getJson<TResponse>(path: string): Promise<TResponse> {
+  const response = await fetch(`${API_BASE_URL}${path}`);
+
+  if (!response.ok) {
+    const message = await readErrorMessage(response);
+    throw new ApiError(message, response.status);
+  }
+
+  return (await response.json()) as TResponse;
+}
+
 async function readErrorMessage(response: Response): Promise<string> {
   try {
     const payload = (await response.json()) as { detail?: unknown };
