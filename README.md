@@ -107,6 +107,18 @@ Done:
 - Done: Preserve FHIR resource IDs and multi-clinic provenance inside generated source text for evidence review.
 - Done: Test valid assignment-style FHIR input and invalid bundle handling.
 
+### Completed Iteration: Pre-LLM Privacy Gate
+
+References:
+- HHS HIPAA de-identification guidance: protected health information includes individually identifiable health information, and Safe Harbor de-identification removes specified identifiers.
+- NIST AI Risk Management Framework: trustworthy AI risk management should consider risks to individuals and organizations across design, development, use, and evaluation.
+
+Done:
+- Done: Detect direct identifiers before prompt construction or model invocation.
+- Done: Block generation and return a validation error when patient names, emails, phone numbers, SSNs, MRNs, street addresses, or API keys are present.
+- Done: Return only redacted source spans for blocked requests.
+- Done: Test that the privacy gate blocks model calls and that redaction covers the detected identifier classes.
+
 ## MVP Scope
 
 The default `MockLLMClient` is deterministic and designed for local testing without an API key. Replace it with a real provider behind the `LLMClient` protocol when integrating an actual model.

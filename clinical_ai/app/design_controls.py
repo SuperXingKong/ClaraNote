@@ -13,6 +13,16 @@ FDA_GMLP = DesignReference(
     authority="FDA",
     url="https://www.fda.gov/medical-devices/software-medical-device-samd/good-machine-learning-practice-medical-device-development-guiding-principles",
 )
+HHS_HIPAA_DEIDENTIFICATION = DesignReference(
+    label="Guidance Regarding Methods for De-identification of Protected Health Information",
+    authority="HHS",
+    url="https://www.hhs.gov/hipaa/for-professionals/special-topics/de-identification/index.html",
+)
+NIST_AI_RMF = DesignReference(
+    label="AI Risk Management Framework",
+    authority="NIST",
+    url="https://www.nist.gov/itl/ai-risk-management-framework",
+)
 HL7_FHIR_R4_BUNDLE = DesignReference(
     label="FHIR R4 Bundle",
     authority="HL7",
@@ -184,6 +194,22 @@ DESIGN_CONTROLS = [
             HL7_FHIR_R4_MEDICATION_STATEMENT,
             HL7_FHIR_R4_CONDITION,
         ],
+    ),
+    DesignControl(
+        feature_id="pre_llm_privacy_gate",
+        title="Pre-LLM direct identifier screening",
+        summary="The draft pipeline blocks generation when raw input contains direct identifiers such as patient names, email addresses, phone numbers, SSNs, MRNs, or street addresses.",
+        rationale=(
+            "HHS HIPAA de-identification guidance treats individually identifiable health information as protected "
+            "and describes removing specified identifiers as one de-identification path. A pre-LLM gate reduces the "
+            "chance that this educational prototype sends direct identifiers to a model provider."
+        ),
+        implemented_in=[
+            "clinical_ai/app/privacy.py",
+            "clinical_ai/app/pipeline.py",
+            "tests/test_privacy_gate.py",
+        ],
+        references=[HHS_HIPAA_DEIDENTIFICATION, NIST_AI_RMF],
     ),
 ]
 

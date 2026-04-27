@@ -4,13 +4,14 @@ import re
 
 from clinical_ai.app.llm_client import LLMClient, MockLLMClient
 from clinical_ai.app.prompt import PROMPT_VERSION, build_prompt
-from clinical_ai.app.privacy import redact_payload
+from clinical_ai.app.privacy import detect_direct_identifiers, redact_payload, redact_text
 from clinical_ai.app.safety_reviewer import SecondPassSafetyReviewer
 from clinical_ai.app.schemas import (
     DraftDebugInfo,
     DraftResponse,
     ResponseMetadata,
     SourceSpan,
+    ValidationIssue,
     ValidationResult,
 )
 from clinical_ai.app.validators import parse_draft
@@ -22,6 +23,31 @@ class DraftPipeline:
         self.safety_reviewer = SecondPassSafetyReviewer()
 
     def process(self, raw_text: str, include_debug: bool = False) -> DraftResponse:
+        privacy_findings = detect_direct_identifiers(raw_text)
+        if privacy_findings:
+            finding_labels = ", ".join(finding.label for finding in privacy_findings)
+            redacted_text = redact_text(raw_text) or ""
+            message = (
+                "Potential direct identifiers detected before LLM processing: "
+                f"{finding_labels}. Remove or de-identify identifiers before generating a draft."
+            )
+            return DraftResponse(
+                draft=None,
+                source_spans=split_source_spans(redacted_text),
+                validation=ValidationResult(
+                    is_valid=False,
+                    errors=[message],
+                    issues=[
+                        ValidationIssue(
+                            code="privacy_direct_identifier",
+                            severity="error",
+                            message=message,
+                        )
+                    ],
+                ),
+                metadata=self._metadata(),
+            )
+
         source_spans = split_source_spans(raw_text)
         if not source_spans:
             return DraftResponse(
