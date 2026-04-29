@@ -33,6 +33,19 @@ python -m clinical_ai.app.openai_key_test --model gpt-5.4
 
 The key test uses the OpenAI Responses API for a tiny connectivity request. The OpenAI-backed draft client also requests structured JSON output and still passes the result through the local Pydantic and safety validators.
 
+## Run with OpenAI-backed drafts
+
+The backend uses the deterministic mock provider by default. To run the local API with a real OpenAI provider, set the key only in the local process environment and do not commit it:
+
+```powershell
+$env:OPENAI_API_KEY="your_api_key_here"
+$env:LLM_PROVIDER="openai"
+$env:OPENAI_MODEL="gpt-5.4"
+uvicorn clinical_ai.app.main:app --reload
+```
+
+Without `LLM_PROVIDER=openai`, the running API will continue to use `MockLLMClient` even when `OPENAI_API_KEY` is set.
+
 ## Test
 
 ```powershell

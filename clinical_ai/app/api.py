@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from fastapi import APIRouter, HTTPException
 
+from clinical_ai.app.config import Settings, get_settings
 from clinical_ai.app.design_controls import get_design_controls
 from clinical_ai.app.evaluation import (
     EvaluationReportResponse,
@@ -9,6 +10,8 @@ from clinical_ai.app.evaluation import (
     generate_assignment_report,
 )
 from clinical_ai.app.fhir_adapter import fhir_bundle_to_text
+from clinical_ai.app.llm_client import MockLLMClient
+from clinical_ai.app.openai_client import OpenAIClinicalReviewClient
 from clinical_ai.app.pipeline import DraftPipeline
 from clinical_ai.app.review_store import JsonlReviewStore
 from clinical_ai.app.schemas import (
@@ -23,7 +26,17 @@ from clinical_ai.app.schemas import (
 
 
 router = APIRouter()
-pipeline = DraftPipeline()
+def create_llm_client(settings: Settings):
+    if settings.llm_provider == "openai":
+        return OpenAIClinicalReviewClient(
+            api_key=settings.openai_api_key,
+            model=settings.openai_model,
+            timeout_seconds=settings.openai_timeout_seconds,
+        )
+    return MockLLMClient()
+
+
+pipeline = DraftPipeline(llm_client=create_llm_client(get_settings()))
 review_store = JsonlReviewStore()
 
 
