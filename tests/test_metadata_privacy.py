@@ -1,5 +1,5 @@
-from clinical_ai.app.privacy import detect_direct_identifiers, redact_payload, redact_text
-from clinical_ai.app.schemas import ClinicianReviewRecord
+from claranote.app.privacy import detect_direct_identifiers, redact_payload, redact_text
+from claranote.app.schemas import ClinicianReviewRecord
 
 
 def test_response_includes_prompt_and_model_metadata(openai_pipeline):

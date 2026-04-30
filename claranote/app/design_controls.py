@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from clinical_ai.app.schemas import DesignControl, DesignControlsResponse, DesignReference
+from claranote.app.schemas import DesignControl, DesignControlsResponse, DesignReference
 
 FDA_CDS = DesignReference(
     label="Clinical Decision Support Software Guidance, January 2026",
@@ -99,8 +99,8 @@ DESIGN_CONTROLS = [
             "healthcare professionals must be able to independently review the basis of recommendations."
         ),
         implemented_in=[
-            "clinical_ai/app/prompt.py",
-            "clinical_ai/app/schemas.py",
+            "claranote/app/prompt.py",
+            "claranote/app/schemas.py",
             "web/src/features/draft/DraftWorkspace.tsx",
         ],
         references=[FDA_CDS, WHO_LMM],
@@ -114,8 +114,8 @@ DESIGN_CONTROLS = [
             "clinical summarisation."
         ),
         implemented_in=[
-            "clinical_ai/app/pipeline.py",
-            "clinical_ai/app/validators.py",
+            "claranote/app/pipeline.py",
+            "claranote/app/validators.py",
             "web/src/features/draft/EvidenceBadge.tsx",
         ],
         references=[FDA_CDS, CREOLA, CHAI_RAIG],
@@ -129,8 +129,8 @@ DESIGN_CONTROLS = [
             "supports structured prompts and unknown handling to reduce clinical summarisation errors."
         ),
         implemented_in=[
-            "clinical_ai/app/prompt.py",
-            "clinical_ai/app/validators.py",
+            "claranote/app/prompt.py",
+            "claranote/app/validators.py",
             "web/src/features/draft/DraftSection.tsx",
         ],
         references=[WHO_LMM, CREOLA],
@@ -144,8 +144,8 @@ DESIGN_CONTROLS = [
             "safety, reliability, transparency, and accountability across the health AI lifecycle."
         ),
         implemented_in=[
-            "clinical_ai/app/safety_reviewer.py",
-            "clinical_ai/app/validators.py",
+            "claranote/app/safety_reviewer.py",
+            "claranote/app/validators.py",
             "web/src/features/validation/ValidationPanel.tsx",
         ],
         references=[CREOLA, CHAI_RAIG],
@@ -159,9 +159,9 @@ DESIGN_CONTROLS = [
             "The UI and API record human review decisions to reduce automation-bias risk and support accountability."
         ),
         implemented_in=[
-            "clinical_ai/app/schemas.py",
-            "clinical_ai/app/review_store.py",
-            "clinical_ai/app/api.py",
+            "claranote/app/schemas.py",
+            "claranote/app/review_store.py",
+            "claranote/app/api.py",
             "web/src/features/review/ReviewControls.tsx",
             "web/src/features/review/ReviewReasonDialog.tsx",
         ],
@@ -191,8 +191,8 @@ DESIGN_CONTROLS = [
             "support explicit testing, monitoring, and reporting of safety-relevant failure modes."
         ),
         implemented_in=[
-            "clinical_ai/app/evaluation.py",
-            "clinical_ai/app/api.py",
+            "claranote/app/evaluation.py",
+            "claranote/app/api.py",
             "web/src/features/evaluation/EvaluationReportView.tsx",
         ],
         references=[FDA_GMLP, CHAI_RAIG, CREOLA],
@@ -208,8 +208,8 @@ DESIGN_CONTROLS = [
             "claiming real EHR integration."
         ),
         implemented_in=[
-            "clinical_ai/app/fhir_adapter.py",
-            "clinical_ai/app/api.py",
+            "claranote/app/fhir_adapter.py",
+            "claranote/app/api.py",
             "tests/test_fhir_adapter.py",
         ],
         references=[
@@ -229,8 +229,8 @@ DESIGN_CONTROLS = [
             "chance that this educational prototype sends direct identifiers to a model provider."
         ),
         implemented_in=[
-            "clinical_ai/app/privacy.py",
-            "clinical_ai/app/pipeline.py",
+            "claranote/app/privacy.py",
+            "claranote/app/pipeline.py",
             "tests/test_privacy_gate.py",
         ],
         references=[HHS_HIPAA_DEIDENTIFICATION, NIST_AI_RMF],
@@ -245,7 +245,7 @@ DESIGN_CONTROLS = [
             "retention keeps the MVP useful for auditability without indefinite local accumulation."
         ),
         implemented_in=[
-            "clinical_ai/app/review_store.py",
+            "claranote/app/review_store.py",
             "tests/test_review_store.py",
         ],
         references=[HHS_HIPAA_MINIMUM_NECESSARY, HHS_HIPAA_AUDIT_PROTOCOL],
@@ -261,7 +261,7 @@ DESIGN_CONTROLS = [
             "that are concise enough to inspect but complete enough to support a clinical claim."
         ),
         implemented_in=[
-            "clinical_ai/app/pipeline.py",
+            "claranote/app/pipeline.py",
             "tests/test_source_spans.py",
         ],
         references=[PERPLEXITY_QUICKSTART, PERPLEXITY_OUTPUT_CONTROL, AIS_ATTRIBUTION],

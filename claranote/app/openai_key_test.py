@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import argparse
 
-from clinical_ai.app.config import DEFAULT_OPENAI_MODEL, get_settings
-from clinical_ai.app.openai_client import OpenAIClinicalReviewClient
+from claranote.app.config import DEFAULT_OPENAI_MODEL, get_settings
+from claranote.app.openai_client import OpenAIClinicalReviewClient
 
 
 def main() -> int:

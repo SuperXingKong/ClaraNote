@@ -1,4 +1,4 @@
-# Clinical Review Draft Generator MVP
+# ClaraNote — Clinical Review Draft Generator
 
 This MVP turns a plain-text patient summary into a structured clinician-review draft. It demonstrates:
 
@@ -14,10 +14,12 @@ For the AI Engineer assignment review, the four deliverables are:
 
 | # | Deliverable | Where |
 |---|---|---|
-| 1 | Prompt | [`clinical_ai/app/prompt.py`](clinical_ai/app/prompt.py) |
-| 2 | Output structure | [`clinical_ai/app/schemas.py`](clinical_ai/app/schemas.py) (`ClinicalReviewDraft`) |
+| 1 | Prompt | [`claranote/app/prompt.py`](claranote/app/prompt.py) |
+| 2 | Output structure | [`claranote/app/schemas.py`](claranote/app/schemas.py) (`ClinicalReviewDraft`) |
 | 3 | Sample output | [`samples/assignment_output.openai.json`](samples/assignment_output.openai.json) (real `gpt-5.4`) plus two failure-case samples in [`samples/`](samples/) |
 | 4 | Failure modes & write-up | [`WRITEUP.md`](WRITEUP.md) |
+
+Total time spent: about 24 hours over 4 days (2026-04-27 → 2026-04-30, SGT).
 
 ## Run with Docker (recommended)
 
@@ -63,7 +65,7 @@ docker compose down -v         # also drop the audit volume
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -e ".[dev]"
-uvicorn clinical_ai.app.main:app --reload
+uvicorn claranote.app.main:app --reload
 
 # Frontend (separate shell)
 cd web
@@ -75,7 +77,7 @@ PowerShell equivalent for the backend env vars:
 
 ```powershell
 $env:OPENAI_API_KEY="your_api_key_here"
-uvicorn clinical_ai.app.main:app --reload
+uvicorn claranote.app.main:app --reload
 ```
 
 ## Test an OpenAI API key
@@ -85,14 +87,14 @@ You can sanity-check the key without spending tokens on a draft:
 
 ```bash
 export OPENAI_API_KEY="your_api_key_here"
-python -m clinical_ai.app.openai_key_test
+python -m claranote.app.openai_key_test
 ```
 
 The default model is `gpt-5.4`. Override:
 
 ```bash
 export OPENAI_MODEL="gpt-5.4"
-python -m clinical_ai.app.openai_key_test --model gpt-5.4
+python -m claranote.app.openai_key_test --model gpt-5.4
 ```
 
 The key test uses the OpenAI Responses API for a tiny connectivity request. The
@@ -115,7 +117,7 @@ export OPENAI_MODEL="gpt-4.1"         # legacy fallback
 You can sanity-check connectivity without spending tokens on a draft:
 
 ```bash
-python -m clinical_ai.app.openai_key_test --model "$OPENAI_MODEL"
+python -m claranote.app.openai_key_test --model "$OPENAI_MODEL"
 ```
 
 This calls the Responses API once with `max_output_tokens=16` and prints
@@ -135,7 +137,7 @@ pytest
 ## Run the safety-first evaluation report
 
 ```bash
-python -m clinical_ai.app.evaluate
+python -m claranote.app.evaluate
 ```
 
 The report runs the golden-case set and summarizes evidence coverage, hallucination-related issues, omission issues, unsafe directive issues, ambiguity failures, and human-in-the-loop review notes.
@@ -240,7 +242,7 @@ Done:
 ## MVP Scope
 
 The MVP runs against the OpenAI Responses API. The `LLMClient` Protocol in
-[`clinical_ai/app/llm_client.py`](clinical_ai/app/llm_client.py) is the
+[`claranote/app/llm_client.py`](claranote/app/llm_client.py) is the
 extension point for adding additional providers (Anthropic, Gemini, on-prem,
 …) without touching the pipeline.
 

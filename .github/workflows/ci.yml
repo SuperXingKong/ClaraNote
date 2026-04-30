@@ -35,7 +35,7 @@ jobs:
           pip install -e ".[dev]" ruff
 
       - name: Lint (ruff)
-        run: ruff check clinical_ai tests
+        run: ruff check claranote tests
 
       - name: Test (pytest)
         run: pytest -q

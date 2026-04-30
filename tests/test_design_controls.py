@@ -1,7 +1,7 @@
 from fastapi.testclient import TestClient
 
-from clinical_ai.app.design_controls import get_design_controls
-from clinical_ai.app.main import create_app
+from claranote.app.design_controls import get_design_controls
+from claranote.app.main import create_app
 
 
 def test_design_controls_include_authoritative_references():

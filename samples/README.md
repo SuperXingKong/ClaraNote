@@ -1,4 +1,4 @@
-# Sample outputs
+# ClaraNote — Sample outputs
 
 Each file is a complete `DraftResponse` for a representative input. Together
 they demonstrate both the happy path and the safety system catching real

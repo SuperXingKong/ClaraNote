@@ -14,7 +14,7 @@ npm install
 Start the backend:
 
 ```powershell
-uvicorn clinical_ai.app.main:app --reload
+uvicorn claranote.app.main:app --reload
 ```
 
 Start the frontend:

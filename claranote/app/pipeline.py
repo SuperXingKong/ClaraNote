@@ -4,11 +4,11 @@ import re
 import uuid
 from dataclasses import dataclass
 
-from clinical_ai.app.llm_client import LLMClient
-from clinical_ai.app.privacy import detect_direct_identifiers, redact_payload, redact_text
-from clinical_ai.app.prompt import PROMPT_VERSION, build_prompt
-from clinical_ai.app.safety_reviewer import SecondPassSafetyReviewer
-from clinical_ai.app.schemas import (
+from claranote.app.llm_client import LLMClient
+from claranote.app.privacy import detect_direct_identifiers, redact_payload, redact_text
+from claranote.app.prompt import PROMPT_VERSION, build_prompt
+from claranote.app.safety_reviewer import SecondPassSafetyReviewer
+from claranote.app.schemas import (
     DraftDebugInfo,
     DraftResponse,
     ResponseMetadata,
@@ -16,7 +16,7 @@ from clinical_ai.app.schemas import (
     ValidationIssue,
     ValidationResult,
 )
-from clinical_ai.app.validators import parse_draft
+from claranote.app.validators import parse_draft
 
 
 @dataclass(frozen=True)

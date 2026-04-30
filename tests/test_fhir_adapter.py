@@ -3,8 +3,8 @@ import os
 import pytest
 from fastapi.testclient import TestClient
 
-from clinical_ai.app.fhir_adapter import fhir_bundle_to_text
-from clinical_ai.app.main import create_app
+from claranote.app.fhir_adapter import fhir_bundle_to_text
+from claranote.app.main import create_app
 
 
 def assignment_fhir_bundle():

@@ -1,10 +1,10 @@
-from clinical_ai.app.evaluation import (
+from claranote.app.evaluation import (
     DEFAULT_GOLDEN_CASES,
     compute_clinician_edit_rate,
     evaluate_golden_cases,
     generate_assignment_report,
 )
-from clinical_ai.app.schemas import ClinicianReviewRecord
+from claranote.app.schemas import ClinicianReviewRecord
 
 
 def test_golden_case_evaluation_runs_and_reports_metrics(openai_pipeline):

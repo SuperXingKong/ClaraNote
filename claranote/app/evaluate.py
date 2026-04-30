@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from clinical_ai.app.evaluation import evaluate_golden_cases, generate_assignment_report
+from claranote.app.evaluation import evaluate_golden_cases, generate_assignment_report
 
 
 def main() -> int:

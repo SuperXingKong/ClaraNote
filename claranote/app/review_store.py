@@ -4,8 +4,8 @@ import json
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
-from clinical_ai.app.privacy import redact_text
-from clinical_ai.app.schemas import ClinicianReviewRecord, ReviewSubmissionRequest
+from claranote.app.privacy import redact_text
+from claranote.app.schemas import ClinicianReviewRecord, ReviewSubmissionRequest
 
 DEFAULT_REVIEW_LOG_PATH = Path(".data/reviews.jsonl")
 DEFAULT_REVIEW_RETENTION_DAYS = 30

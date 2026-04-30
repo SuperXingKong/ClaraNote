@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from clinical_ai.app.schemas import SourceSpan
+from claranote.app.schemas import SourceSpan
 
 PROMPT_VERSION = "clinical-review-v2"
 

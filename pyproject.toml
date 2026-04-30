@@ -1,7 +1,7 @@
 [project]
-name = "clinical-ai"
+name = "claranote"
 version = "0.1.0"
-description = "MVP clinical review draft generator with evidence mapping and safety validation."
+description = "ClaraNote — clinical review draft generator with evidence mapping and safety validation."
 requires-python = ">=3.11"
 dependencies = [
     "fastapi>=0.115.0",
@@ -11,8 +11,8 @@ dependencies = [
 ]
 
 [project.scripts]
-clinical-ai-evaluate = "clinical_ai.app.evaluate:main"
-clinical-ai-openai-key-test = "clinical_ai.app.openai_key_test:main"
+claranote-evaluate = "claranote.app.evaluate:main"
+claranote-openai-key-test = "claranote.app.openai_key_test:main"
 
 [project.optional-dependencies]
 dev = [
@@ -26,7 +26,7 @@ testpaths = ["tests"]
 pythonpath = ["."]
 
 [tool.setuptools.packages.find]
-include = ["clinical_ai*"]
+include = ["claranote*"]
 
 [tool.ruff]
 line-length = 100

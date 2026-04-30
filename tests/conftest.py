@@ -15,9 +15,9 @@ import os
 
 import pytest
 
-from clinical_ai.app.config import get_settings
-from clinical_ai.app.openai_client import OpenAIClinicalReviewClient
-from clinical_ai.app.pipeline import DraftPipeline
+from claranote.app.config import get_settings
+from claranote.app.openai_client import OpenAIClinicalReviewClient
+from claranote.app.pipeline import DraftPipeline
 
 
 def _real_openai_client() -> OpenAIClinicalReviewClient:

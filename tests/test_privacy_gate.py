@@ -1,4 +1,4 @@
-from clinical_ai.app.pipeline import DraftPipeline
+from claranote.app.pipeline import DraftPipeline
 
 
 def test_privacy_gate_blocks_direct_identifiers_before_llm_call(openai_client):

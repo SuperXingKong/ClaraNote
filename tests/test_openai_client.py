@@ -1,7 +1,7 @@
 from types import SimpleNamespace
 
-from clinical_ai.app.config import DEFAULT_OPENAI_MODEL
-from clinical_ai.app.openai_client import OpenAIClinicalReviewClient
+from claranote.app.config import DEFAULT_OPENAI_MODEL
+from claranote.app.openai_client import OpenAIClinicalReviewClient
 
 
 class FakeResponses:

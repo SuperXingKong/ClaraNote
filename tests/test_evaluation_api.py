@@ -1,6 +1,6 @@
 from fastapi.testclient import TestClient
 
-from clinical_ai.app.main import create_app
+from claranote.app.main import create_app
 
 
 def test_evaluation_api_returns_metrics_and_report():

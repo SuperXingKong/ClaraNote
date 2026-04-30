@@ -3,8 +3,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.backend
-    image: clinical-ai-backend:latest
-    container_name: clinical-ai-backend
+    image: claranote-backend:latest
+    container_name: claranote-backend
     restart: unless-stopped
     environment:
       # OPENAI_API_KEY is required for /v1/drafts to work. /healthz remains
@@ -17,7 +17,7 @@ services:
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8080,http://127.0.0.1:8080}
     volumes:
       # Persist redacted clinician review records across restarts.
-      - clinical-ai-data:/app/.data
+      - claranote-data:/app/.data
     expose:
       - "8000"
     ports:
@@ -25,7 +25,7 @@ services:
       # without explicit intent. Frontend reaches it via the compose network.
       - "127.0.0.1:8000:8000"
     networks:
-      - clinical-ai
+      - claranote
     healthcheck:
       test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8000/healthz"]
       interval: 30s
@@ -39,8 +39,8 @@ services:
       dockerfile: Dockerfile
       args:
         VITE_API_BASE_URL: /api
-    image: clinical-ai-web:latest
-    container_name: clinical-ai-web
+    image: claranote-web:latest
+    container_name: claranote-web
     restart: unless-stopped
     depends_on:
       backend:
@@ -48,7 +48,7 @@ services:
     ports:
       - "${WEB_PORT:-8080}:80"
     networks:
-      - clinical-ai
+      - claranote
     healthcheck:
       test: ["CMD", "curl", "-fsS", "http://127.0.0.1/healthz"]
       interval: 30s
@@ -57,9 +57,9 @@ services:
       start_period: 5s
 
 networks:
-  clinical-ai:
+  claranote:
     driver: bridge
 
 volumes:
-  clinical-ai-data:
+  claranote-data:
     driver: local

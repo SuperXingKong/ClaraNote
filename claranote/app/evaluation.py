@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field
 
-from clinical_ai.app.pipeline import DraftPipeline
-from clinical_ai.app.privacy import redact_text
-from clinical_ai.app.schemas import ClinicianReviewRecord, DraftResponse, ValidationIssue
+from claranote.app.pipeline import DraftPipeline
+from claranote.app.privacy import redact_text
+from claranote.app.schemas import ClinicianReviewRecord, DraftResponse, ValidationIssue
 
 
 class GoldenCase(BaseModel):
@@ -109,8 +109,8 @@ def evaluate_golden_cases(
     if pipeline is None:
         # Lazy import to avoid pulling the OpenAI client into module import
         # paths that don't need it (e.g. tests that build their own pipeline).
-        from clinical_ai.app.api import create_llm_client
-        from clinical_ai.app.config import get_settings
+        from claranote.app.api import create_llm_client
+        from claranote.app.config import get_settings
 
         pipeline = DraftPipeline(llm_client=create_llm_client(get_settings()))
     cases = cases or DEFAULT_GOLDEN_CASES

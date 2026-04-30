@@ -1,5 +1,5 @@
-from clinical_ai.app.schemas import ClinicalReviewDraft, EvidenceBackedItem, SourceSpan
-from clinical_ai.app.validators import validate_all
+from claranote.app.schemas import ClinicalReviewDraft, EvidenceBackedItem, SourceSpan
+from claranote.app.validators import validate_all
 
 
 def test_unclear_fasting_glucose_recency_blocks_trend_claim():

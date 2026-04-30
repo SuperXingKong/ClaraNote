@@ -1,7 +1,7 @@
 import pytest
 from pydantic import ValidationError
 
-from clinical_ai.app.schemas import ClinicalReviewDraft
+from claranote.app.schemas import ClinicalReviewDraft
 
 
 def test_missing_required_schema_fields_fail():

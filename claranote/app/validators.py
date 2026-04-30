@@ -5,7 +5,7 @@ from dataclasses import dataclass
 
 from pydantic import ValidationError
 
-from clinical_ai.app.schemas import (
+from claranote.app.schemas import (
     ClinicalReviewDraft,
     SourceSpan,
     ValidationIssue,

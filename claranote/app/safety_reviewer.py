@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from clinical_ai.app.schemas import ClinicalReviewDraft, SourceSpan, ValidationResult
-from clinical_ai.app.validators import validate_all
+from claranote.app.schemas import ClinicalReviewDraft, SourceSpan, ValidationResult
+from claranote.app.validators import validate_all
 
 
 class SecondPassSafetyReviewer:

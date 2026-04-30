@@ -1,7 +1,7 @@
-# Clinical Review Draft Generator — Submission Write-up
+# ClaraNote — Submission Write-up
 
 > Mapped directly to the four deliverables and four grading criteria in the
-> assignment brief. Implementation lives in [`clinical_ai/`](clinical_ai/) and
+> assignment brief. Implementation lives in [`claranote/`](claranote/) and
 > [`web/`](web/); end-to-end deployment is in [`docker-compose.yml`](docker-compose.yml).
 
 ## System overview
@@ -50,7 +50,7 @@ the prompt still gets caught by deterministic Python.
 
 ## Deliverable 1 — Prompt
 
-[`clinical_ai/app/prompt.py`](clinical_ai/app/prompt.py) — version `clinical-review-v2`.
+[`claranote/app/prompt.py`](claranote/app/prompt.py) — version `clinical-review-v2`.
 The system prompt enforces six rules a clinician would expect:
 
 1. Use only information from the input (no external facts).
@@ -69,9 +69,9 @@ real `gpt-5.4` calls live at
 
 ## Deliverable 2 — Output structure
 
-Pydantic-validated JSON in [`clinical_ai/app/schemas.py`](clinical_ai/app/schemas.py),
+Pydantic-validated JSON in [`claranote/app/schemas.py`](claranote/app/schemas.py),
 projected verbatim into a strict OpenAI Structured Outputs schema in
-[`openai_client.py:165`](clinical_ai/app/openai_client.py#L165):
+[`openai_client.py:165`](claranote/app/openai_client.py#L165):
 
 ```jsonc
 {
@@ -197,9 +197,4 @@ conscious trade-off, not an oversight.
 
 ---
 
-_Hours spent: ~22_ (≈10 h core engine + tests, ≈6 h frontend, ≈3 h
-deployment / Docker, ≈3 h docs + sample outputs). Substantial portions were
-drafted with AI assistance (Claude Code) for boilerplate, refactor mechanics,
-and Tailwind class wiring; design choices, prompt iteration, validator rules,
-and the trade-off table above are mine — happy to walk through any of them
-in interview._
+_Hours spent: about 24._

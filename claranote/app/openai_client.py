@@ -6,9 +6,9 @@ from typing import Any
 
 from pydantic import BaseModel
 
-from clinical_ai.app.config import DEFAULT_OPENAI_MODEL
-from clinical_ai.app.prompt import SYSTEM_INSTRUCTIONS
-from clinical_ai.app.schemas import SourceSpan
+from claranote.app.config import DEFAULT_OPENAI_MODEL
+from claranote.app.prompt import SYSTEM_INSTRUCTIONS
+from claranote.app.schemas import SourceSpan
 
 
 class OpenAIKeyTestResult(BaseModel):

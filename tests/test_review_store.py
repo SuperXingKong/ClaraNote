@@ -2,10 +2,10 @@ from datetime import UTC, datetime, timedelta
 
 from fastapi.testclient import TestClient
 
-from clinical_ai.app import api
-from clinical_ai.app.main import create_app
-from clinical_ai.app.review_store import JsonlReviewStore
-from clinical_ai.app.schemas import ClinicianReviewRecord, ReviewSubmissionRequest
+from claranote.app import api
+from claranote.app.main import create_app
+from claranote.app.review_store import JsonlReviewStore
+from claranote.app.schemas import ClinicianReviewRecord, ReviewSubmissionRequest
 
 
 def test_review_store_redacts_and_lists_records(tmp_path):

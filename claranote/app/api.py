@@ -2,18 +2,18 @@ from __future__ import annotations
 
 from fastapi import APIRouter, HTTPException
 
-from clinical_ai.app.config import Settings, get_settings
-from clinical_ai.app.design_controls import get_design_controls
-from clinical_ai.app.evaluation import (
+from claranote.app.config import Settings, get_settings
+from claranote.app.design_controls import get_design_controls
+from claranote.app.evaluation import (
     EvaluationReportResponse,
     evaluate_golden_cases,
     generate_assignment_report,
 )
-from clinical_ai.app.fhir_adapter import fhir_bundle_to_text
-from clinical_ai.app.openai_client import OpenAIClinicalReviewClient
-from clinical_ai.app.pipeline import DraftPipeline
-from clinical_ai.app.review_store import JsonlReviewStore
-from clinical_ai.app.schemas import (
+from claranote.app.fhir_adapter import fhir_bundle_to_text
+from claranote.app.openai_client import OpenAIClinicalReviewClient
+from claranote.app.pipeline import DraftPipeline
+from claranote.app.review_store import JsonlReviewStore
+from claranote.app.schemas import (
     DesignControlsResponse,
     DraftRequest,
     DraftResponse,
