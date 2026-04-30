@@ -8,6 +8,17 @@ This MVP turns a plain-text patient summary into a structured clinician-review d
 - Safety validation that blocks direct diagnosis or treatment instructions
 - A minimal FastAPI endpoint at `POST /v1/drafts`
 
+## Assignment submission
+
+For the AI Engineer assignment review, the four deliverables are:
+
+| # | Deliverable | Where |
+|---|---|---|
+| 1 | Prompt | [`clinical_ai/app/prompt.py`](clinical_ai/app/prompt.py) |
+| 2 | Output structure | [`clinical_ai/app/schemas.py`](clinical_ai/app/schemas.py) (`ClinicalReviewDraft`) |
+| 3 | Sample output | [`samples/assignment_output.openai.json`](samples/assignment_output.openai.json) (real `gpt-5.4`) and [`samples/assignment_output.mock.json`](samples/assignment_output.mock.json) (deterministic) |
+| 4 | Failure modes & write-up | [`WRITEUP.md`](WRITEUP.md) |
+
 ## Run with Docker (recommended)
 
 The repository ships with a two-service compose stack:

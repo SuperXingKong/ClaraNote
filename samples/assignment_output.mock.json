@@ -1,0 +1,197 @@
+{
+  "draft": {
+    "key_clinical_summary": [
+      {
+        "text": "58-year-old female with history of type 2 diabetes and hyperlipidemia.",
+        "evidence_ids": [
+          "S1"
+        ],
+        "confidence": "high",
+        "requires_clinician_review": false
+      },
+      {
+        "text": "Recent labs include HbA1c 7.8% in January and 8.4% in March, fasting glucose values 6.5 and 8.9 mmol/L with unclear recency, and LDL 4.2 mmol/L.",
+        "evidence_ids": [
+          "S2"
+        ],
+        "confidence": "high",
+        "requires_clinician_review": true
+      },
+      {
+        "text": "Reported medications include metformin 500 mg twice daily and atorvastatin 10 mg, with uncertainty about whether atorvastatin is still being taken.",
+        "evidence_ids": [
+          "S3"
+        ],
+        "confidence": "high",
+        "requires_clinician_review": true
+      },
+      {
+        "text": "Symptoms reported include fatigue and occasional blurred vision.",
+        "evidence_ids": [
+          "S4"
+        ],
+        "confidence": "high",
+        "requires_clinician_review": true
+      }
+    ],
+    "trends": [
+      {
+        "text": "HbA1c increased from 7.8% in January to 8.4% in March, suggesting worsening glycemic control for clinician review.",
+        "evidence_ids": [
+          "S2"
+        ],
+        "confidence": "high",
+        "requires_clinician_review": true
+      }
+    ],
+    "risk_flags": [
+      {
+        "text": "HbA1c 8.4% and symptoms of fatigue and occasional blurred vision may warrant review of glycemic control.",
+        "evidence_ids": [
+          "S2",
+          "S4"
+        ],
+        "confidence": "medium",
+        "requires_clinician_review": true
+      },
+      {
+        "text": "LDL 4.2 mmol/L is a cardiovascular risk flag in a patient with diabetes and hyperlipidemia.",
+        "evidence_ids": [
+          "S1",
+          "S2"
+        ],
+        "confidence": "medium",
+        "requires_clinician_review": true
+      },
+      {
+        "text": "Medication adherence is unclear, including uncertainty about current atorvastatin use.",
+        "evidence_ids": [
+          "S3",
+          "S5"
+        ],
+        "confidence": "high",
+        "requires_clinician_review": true
+      }
+    ],
+    "uncertainties": [
+      {
+        "text": "The fasting glucose values have unclear recency, so no fasting glucose trend should be inferred.",
+        "evidence_ids": [
+          "S2"
+        ],
+        "confidence": "high",
+        "requires_clinician_review": true
+      },
+      {
+        "text": "The patient is unsure whether she is still taking atorvastatin.",
+        "evidence_ids": [
+          "S3"
+        ],
+        "confidence": "high",
+        "requires_clinician_review": true
+      },
+      {
+        "text": "Overall medication adherence is unclear.",
+        "evidence_ids": [
+          "S3",
+          "S5"
+        ],
+        "confidence": "high",
+        "requires_clinician_review": true
+      },
+      {
+        "text": "Some lab values were recorded from different clinics, so source reconciliation may be needed.",
+        "evidence_ids": [
+          "S5"
+        ],
+        "confidence": "high",
+        "requires_clinician_review": true
+      }
+    ],
+    "suggested_follow_up_areas": [
+      {
+        "text": "Confirm current medication adherence, including metformin use and whether atorvastatin is still being taken.",
+        "evidence_ids": [
+          "S3",
+          "S5"
+        ],
+        "confidence": "medium",
+        "requires_clinician_review": true
+      },
+      {
+        "text": "Clarify the dates and sources of fasting glucose results before interpreting trend.",
+        "evidence_ids": [
+          "S2",
+          "S5"
+        ],
+        "confidence": "high",
+        "requires_clinician_review": true
+      },
+      {
+        "text": "Review glycemic control in light of HbA1c trend, reported symptoms, and recent diet changes.",
+        "evidence_ids": [
+          "S2",
+          "S4",
+          "S5"
+        ],
+        "confidence": "medium",
+        "requires_clinician_review": true
+      },
+      {
+        "text": "Review lipid and cardiovascular risk context given LDL 4.2 mmol/L and diabetes history.",
+        "evidence_ids": [
+          "S1",
+          "S2"
+        ],
+        "confidence": "medium",
+        "requires_clinician_review": true
+      }
+    ],
+    "safety_note": "Draft for clinician review only. This output does not diagnose, prescribe, or replace clinical judgment."
+  },
+  "source_spans": [
+    {
+      "id": "S1",
+      "text": "58-year-old female with history of type 2 diabetes and hyperlipidemia.",
+      "start": 0,
+      "end": 70
+    },
+    {
+      "id": "S2",
+      "text": "Latest labs (last 2-3 months):\nHbA1c: 7.8% (Jan), 8.4% (March)\nFasting glucose: 6.5 mmol/L, 8.9 mmol/L (unclear which is most recent)\nLDL: 4.2 mmol/L",
+      "start": 71,
+      "end": 226
+    },
+    {
+      "id": "S3",
+      "text": "Medications:\nMetformin 500mg twice daily\nAtorvastatin 10mg (patient unsure if still taking)",
+      "start": 227,
+      "end": 322
+    },
+    {
+      "id": "S4",
+      "text": "Symptoms:\nFatigue\nOccasional blurred vision",
+      "start": 323,
+      "end": 370
+    },
+    {
+      "id": "S5",
+      "text": "Notes:\nPatient reports improving diet recently\nAdherence unclear\nSome lab values recorded from different clinics",
+      "start": 371,
+      "end": 489
+    }
+  ],
+  "validation": {
+    "is_valid": true,
+    "errors": [],
+    "warnings": [],
+    "issues": []
+  },
+  "metadata": {
+    "draft_id": "sample-assignment-output",
+    "prompt_version": "clinical-review-v2",
+    "model_version": "mock-clinical-review-v1",
+    "llm_provider": "mock"
+  },
+  "debug": null
+}
