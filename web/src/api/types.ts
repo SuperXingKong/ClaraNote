@@ -41,6 +41,7 @@ export type ValidationIssue = {
   severity: IssueSeverity;
   message: string;
   section: string | null;
+  item_index: number | null;
   evidence_ids: string[];
 };
 
@@ -52,9 +53,19 @@ export type ValidationResult = {
 };
 
 export type ResponseMetadata = {
+  draft_id: string;
   prompt_version: string;
   model_version: string;
   llm_provider: string;
+};
+
+export type HealthResponse = {
+  status: "ok";
+  llm_provider: string;
+};
+
+export type FhirDraftRequest = {
+  bundle: Record<string, unknown>;
 };
 
 export type DraftDebugInfo = {

@@ -19,6 +19,7 @@ from clinical_ai.app.schemas import (
     DraftRequest,
     DraftResponse,
     FhirDraftRequest,
+    HealthResponse,
     ReviewListResponse,
     ReviewSubmissionRequest,
     ReviewSubmissionResponse,
@@ -38,6 +39,12 @@ def create_llm_client(settings: Settings):
 
 pipeline = DraftPipeline(llm_client=create_llm_client(get_settings()))
 review_store = JsonlReviewStore()
+
+
+@router.get("/healthz", response_model=HealthResponse)
+async def healthz() -> HealthResponse:
+    settings = get_settings()
+    return HealthResponse(status="ok", llm_provider=settings.llm_provider)
 
 
 @router.post("/v1/drafts", response_model=DraftResponse)

@@ -9,16 +9,23 @@ import { submitReview } from "../../api/reviewApi";
 import { ReviewReasonDialog } from "./ReviewReasonDialog";
 
 export function ReviewControls({
+  draftId,
   itemKey,
   review,
   onReviewChange,
+  onReviewSubmitted,
 }: {
+  draftId: string;
   itemKey: string;
   review?: ReviewState;
   onReviewChange: (review: ReviewState) => void;
+  onReviewSubmitted?: () => void;
 }) {
   const [dialogDecision, setDialogDecision] = useState<ReviewDecision | null>(null);
-  const submitMutation = useMutation({ mutationFn: submitReview });
+  const submitMutation = useMutation({
+    mutationFn: submitReview,
+    onSuccess: () => onReviewSubmitted?.(),
+  });
 
   function saveDecision(
     decision: ReviewDecision,
@@ -27,7 +34,7 @@ export function ReviewControls({
   ) {
     onReviewChange({ itemKey, decision, reasonCodes, comments });
     submitMutation.mutate({
-      draft_id: "current-draft",
+      draft_id: draftId,
       item_key: itemKey,
       decision,
       reason_codes: reasonCodes,

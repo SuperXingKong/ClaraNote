@@ -51,7 +51,8 @@ export function ReviewReasonDialog({
                 {decision} draft item
               </Dialog.Title>
               <Dialog.Description className="mt-1 text-sm text-clinical-muted">
-                Capture the review reason. This is frontend-only state in the MVP.
+                Capture the review reason. The decision is persisted as a redacted audit
+                record on the backend.
               </Dialog.Description>
             </div>
             <Dialog.Close asChild>

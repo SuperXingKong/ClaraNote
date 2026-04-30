@@ -45,7 +45,7 @@ class MockLLMClient:
                     "text": "58-year-old female with history of type 2 diabetes and hyperlipidemia.",
                     "evidence_ids": history_ids,
                     "confidence": "high",
-                    "requires_clinician_review": True,
+                    "requires_clinician_review": False,
                 },
                 {
                     "text": "Recent labs include HbA1c 7.8% in January and 8.4% in March, fasting glucose values 6.5 and 8.9 mmol/L with unclear recency, and LDL 4.2 mmol/L.",

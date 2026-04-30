@@ -8,10 +8,61 @@ This MVP turns a plain-text patient summary into a structured clinician-review d
 - Safety validation that blocks direct diagnosis or treatment instructions
 - A minimal FastAPI endpoint at `POST /v1/drafts`
 
-## Run
+## Run with Docker (recommended)
+
+The repository ships with a two-service compose stack:
+
+- `backend` — FastAPI/uvicorn on port `8000` (loopback-only host binding).
+- `web` — Vite-built SPA served by Nginx on port `8080` (overridable). Nginx reverse-proxies `/api/...` to the backend over the compose network so the browser only ever talks to the web container.
+
+```bash
+# 1. (Optional) override defaults
+cp .env.example .env
+
+# 2. Build images and start the stack
+docker compose up -d --build
+
+# 3. Open the app
+xdg-open http://localhost:8080   # or just visit it in your browser
+```
+
+Health checks:
+
+```bash
+curl http://localhost:8080/healthz          # web (nginx)
+curl http://localhost:8080/api/healthz      # backend via reverse-proxy
+curl http://127.0.0.1:8000/healthz          # backend direct (loopback only)
+```
+
+To enable the OpenAI-backed provider, populate `.env` with `LLM_PROVIDER=openai` and `OPENAI_API_KEY=...`, then `docker compose up -d --build` again. Without those, the stack runs the deterministic `MockLLMClient` and needs no API key.
+
+Tear down:
+
+```bash
+docker compose down            # keep the redacted review JSONL volume
+docker compose down -v         # also drop the audit volume
+```
+
+## Run locally without Docker
+
+```bash
+# Backend
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -e ".[dev]"
+uvicorn clinical_ai.app.main:app --reload
+
+# Frontend (separate shell)
+cd web
+npm install
+npm run dev          # http://127.0.0.1:5173, talks to backend at 127.0.0.1:8000
+```
+
+PowerShell equivalent for the backend env vars:
 
 ```powershell
-pip install -e ".[dev]"
+$env:LLM_PROVIDER="openai"
+$env:OPENAI_API_KEY="your_api_key_here"
 uvicorn clinical_ai.app.main:app --reload
 ```
 
@@ -19,15 +70,15 @@ uvicorn clinical_ai.app.main:app --reload
 
 The MVP keeps `MockLLMClient` as the default local provider. To test a real OpenAI key explicitly:
 
-```powershell
-$env:OPENAI_API_KEY="your_api_key_here"
+```bash
+export OPENAI_API_KEY="your_api_key_here"
 python -m clinical_ai.app.openai_key_test
 ```
 
 The default model is `gpt-5.4`. Override it with either:
 
-```powershell
-$env:OPENAI_MODEL="gpt-5.4"
+```bash
+export OPENAI_MODEL="gpt-5.4"
 python -m clinical_ai.app.openai_key_test --model gpt-5.4
 ```
 
@@ -37,10 +88,10 @@ The key test uses the OpenAI Responses API for a tiny connectivity request. The 
 
 The backend uses the deterministic mock provider by default. To run the local API with a real OpenAI provider, set the key only in the local process environment and do not commit it:
 
-```powershell
-$env:OPENAI_API_KEY="your_api_key_here"
-$env:LLM_PROVIDER="openai"
-$env:OPENAI_MODEL="gpt-5.4"
+```bash
+export OPENAI_API_KEY="your_api_key_here"
+export LLM_PROVIDER="openai"
+export OPENAI_MODEL="gpt-5.4"
 uvicorn clinical_ai.app.main:app --reload
 ```
 
@@ -48,13 +99,13 @@ Without `LLM_PROVIDER=openai`, the running API will continue to use `MockLLMClie
 
 ## Test
 
-```powershell
+```bash
 pytest
 ```
 
 ## Run the safety-first evaluation report
 
-```powershell
+```bash
 python -m clinical_ai.app.evaluate
 ```
 

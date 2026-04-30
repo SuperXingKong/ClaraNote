@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+import uuid
 from dataclasses import dataclass
 
 from clinical_ai.app.llm_client import LLMClient, MockLLMClient
@@ -32,6 +33,7 @@ class DraftPipeline:
         self.safety_reviewer = SecondPassSafetyReviewer()
 
     def process(self, raw_text: str, include_debug: bool = False) -> DraftResponse:
+        draft_id = uuid.uuid4().hex
         privacy_findings = detect_direct_identifiers(raw_text)
         if privacy_findings:
             finding_labels = ", ".join(finding.label for finding in privacy_findings)
@@ -54,7 +56,7 @@ class DraftPipeline:
                         )
                     ],
                 ),
-                metadata=self._metadata(),
+                metadata=self._metadata(draft_id),
             )
 
         source_spans = split_source_spans(raw_text)
@@ -66,7 +68,7 @@ class DraftPipeline:
                     is_valid=False,
                     errors=["raw_text has no usable clinical content."],
                 ),
-                metadata=self._metadata(),
+                metadata=self._metadata(draft_id),
             )
 
         prompt = build_prompt(raw_text=raw_text, source_spans=source_spans)
@@ -90,12 +92,13 @@ class DraftPipeline:
             draft=draft,
             source_spans=source_spans,
             validation=validation,
-            metadata=self._metadata(),
+            metadata=self._metadata(draft_id),
             debug=debug,
         )
 
-    def _metadata(self) -> ResponseMetadata:
+    def _metadata(self, draft_id: str) -> ResponseMetadata:
         return ResponseMetadata(
+            draft_id=draft_id,
             prompt_version=PROMPT_VERSION,
             model_version=str(getattr(self.llm_client, "model_name", "unknown")),
             llm_provider=str(getattr(self.llm_client, "provider_name", "unknown")),

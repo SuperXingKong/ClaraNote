@@ -1,0 +1,65 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    image: clinical-ai-backend:latest
+    container_name: clinical-ai-backend
+    restart: unless-stopped
+    environment:
+      # Default to mock provider so the stack runs without an API key.
+      LLM_PROVIDER: ${LLM_PROVIDER:-mock}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-5.4}
+      OPENAI_TIMEOUT_SECONDS: ${OPENAI_TIMEOUT_SECONDS:-30}
+      # Browser hits the frontend host; nginx proxies /api -> backend, so this
+      # is only consulted for direct CORS access.
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8080,http://127.0.0.1:8080}
+    volumes:
+      # Persist redacted clinician review records across restarts.
+      - clinical-ai-data:/app/.data
+    expose:
+      - "8000"
+    ports:
+      # Expose only on loopback so the API isn't reachable from the network
+      # without explicit intent. Frontend reaches it via the compose network.
+      - "127.0.0.1:8000:8000"
+    networks:
+      - clinical-ai
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8000/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: /api
+    image: clinical-ai-web:latest
+    container_name: clinical-ai-web
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "${WEB_PORT:-8080}:80"
+    networks:
+      - clinical-ai
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+networks:
+  clinical-ai:
+    driver: bridge
+
+volumes:
+  clinical-ai-data:
+    driver: local

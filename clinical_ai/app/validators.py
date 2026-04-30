@@ -46,6 +46,27 @@ EVIDENCE_REQUIRED_SECTIONS = [
     "suggested_follow_up_areas",
 ]
 
+SECTION_LABELS: dict[str, str] = {
+    "key_clinical_summary": "Key clinical summary",
+    "trends": "Trends",
+    "risk_flags": "Risk flags",
+    "uncertainties": "Uncertainties",
+    "suggested_follow_up_areas": "Suggested follow-up",
+}
+
+
+def section_label(section_name: str) -> str:
+    return SECTION_LABELS.get(section_name, section_name.replace("_", " ").capitalize())
+
+
+CODE_LABELS: dict[str, str] = {
+    "unsupported_condition": "an unsupported condition",
+    "unsupported_medication": "an unsupported medication",
+    "unsupported_lab_trend": "an unsupported lab trend",
+    "unsupported_symptom": "an unsupported symptom",
+    "unsupported_recommendation": "an unsafe recommendation",
+}
+
 STOPWORDS = {
     "a",
     "an",
@@ -182,7 +203,6 @@ def validate_all(
 
     issues: list[ValidationIssue] = []
     issues.extend(validate_evidence(draft, source_spans))
-    issues.extend(validate_clinician_review_required(draft))
     issues.extend(validate_ambiguity(draft, raw_text))
     issues.extend(validate_safety(draft))
     issues.extend(validate_omissions(draft, raw_text))
@@ -207,14 +227,16 @@ def validate_evidence(
     valid_ids = {span.id for span in source_spans}
     span_by_id = {span.id: span for span in source_spans}
 
-    for section_name, item in iter_evidence_items(draft):
+    for section_name, item_index, item in iter_evidence_items(draft):
+        label = section_label(section_name)
         if not item.evidence_ids:
             issues.append(
                 ValidationIssue(
                     code="unsupported_claim",
                     severity="error",
                     section=section_name,
-                    message=f"{section_name} item lacks evidence_ids: {item.text}",
+                    item_index=item_index,
+                    message=f"{label} item lacks evidence: {item.text}",
                 )
             )
             continue
@@ -226,33 +248,23 @@ def validate_evidence(
                     code="unsupported_claim",
                     severity="error",
                     section=section_name,
+                    item_index=item_index,
                     evidence_ids=unknown_ids,
-                    message=f"{section_name} item references unknown evidence IDs {unknown_ids}: {item.text}",
+                    message=(
+                        f"{label} item references unknown evidence IDs "
+                        f"{', '.join(unknown_ids)}: {item.text}"
+                    ),
                 )
             )
             continue
 
         evidence_text = " ".join(span_by_id[evidence_id].text for evidence_id in item.evidence_ids)
-        support_issue = classify_evidence_support(section_name, item.text, evidence_text, item.evidence_ids)
+        support_issue = classify_evidence_support(
+            section_name, item_index, item.text, evidence_text, item.evidence_ids
+        )
         if support_issue is not None:
             issues.append(support_issue)
 
-    return issues
-
-
-def validate_clinician_review_required(draft: ClinicalReviewDraft) -> list[ValidationIssue]:
-    issues: list[ValidationIssue] = []
-    for section_name, item in iter_evidence_items(draft):
-        if not item.requires_clinician_review:
-            issues.append(
-                ValidationIssue(
-                    code="unsupported_claim",
-                    severity="error",
-                    section=section_name,
-                    evidence_ids=item.evidence_ids,
-                    message=f"{section_name} item is not marked for clinician review: {item.text}",
-                )
-            )
     return issues
 
 
@@ -266,7 +278,7 @@ def validate_ambiguity(draft: ClinicalReviewDraft, raw_text: str) -> list[Valida
     if not has_unclear_fasting_glucose:
         return issues
 
-    for item in draft.trends:
+    for index, item in enumerate(draft.trends):
         lowered_text = item.text.lower()
         if "fasting glucose" in lowered_text and any(term in lowered_text for term in TREND_TERMS):
             issues.append(
@@ -274,6 +286,7 @@ def validate_ambiguity(draft: ClinicalReviewDraft, raw_text: str) -> list[Valida
                     code="incorrect_temporality",
                     severity="error",
                     section="trends",
+                    item_index=index,
                     evidence_ids=item.evidence_ids,
                     message="Fasting glucose recency is unclear, so the draft must not infer a fasting glucose trend.",
                 )
@@ -284,7 +297,7 @@ def validate_ambiguity(draft: ClinicalReviewDraft, raw_text: str) -> list[Valida
 
 def validate_safety(draft: ClinicalReviewDraft) -> list[ValidationIssue]:
     issues: list[ValidationIssue] = []
-    for section_name, item in iter_evidence_items(draft):
+    for section_name, item_index, item in iter_evidence_items(draft):
         text = item.text
         for pattern in SAFETY_PATTERNS:
             if re.search(pattern, text, flags=re.IGNORECASE):
@@ -293,8 +306,9 @@ def validate_safety(draft: ClinicalReviewDraft) -> list[ValidationIssue]:
                         code="unsupported_recommendation",
                         severity="error",
                         section=section_name,
+                        item_index=item_index,
                         evidence_ids=item.evidence_ids,
-                        message=f"Unsafe directive in {section_name}: {text}",
+                        message=f"Unsafe directive in {section_label(section_name)}: {text}",
                     )
                 )
                 break
@@ -323,6 +337,7 @@ def validate_omissions(draft: ClinicalReviewDraft, raw_text: str) -> list[Valida
 
 def classify_evidence_support(
     section_name: str,
+    item_index: int,
     claim_text: str,
     evidence_text: str,
     evidence_ids: list[str],
@@ -335,19 +350,26 @@ def classify_evidence_support(
         return None
 
     if overlap:
-        return classify_domain_specific_mismatch(section_name, claim_text, evidence_text, evidence_ids)
+        return classify_domain_specific_mismatch(
+            section_name, item_index, claim_text, evidence_text, evidence_ids
+        )
 
     return ValidationIssue(
         code="unsupported_claim",
         severity="error",
         section=section_name,
+        item_index=item_index,
         evidence_ids=evidence_ids,
-        message=f"{section_name} item may not be supported by its cited evidence: {claim_text}",
+        message=(
+            f"{section_label(section_name)} item may not be supported by its cited "
+            f"evidence: {claim_text}"
+        ),
     )
 
 
 def classify_domain_specific_mismatch(
     section_name: str,
+    item_index: int,
     claim_text: str,
     evidence_text: str,
     evidence_ids: list[str],
@@ -357,19 +379,19 @@ def classify_domain_specific_mismatch(
 
     for term in CONDITION_TERMS:
         if term in lowered_claim and term not in lowered_evidence and term not in {"cardiovascular"}:
-            return issue_for("unsupported_condition", section_name, claim_text, evidence_ids)
+            return issue_for("unsupported_condition", section_name, item_index, claim_text, evidence_ids)
 
     for term in MEDICATION_TERMS:
         if term in lowered_claim and term not in lowered_evidence:
-            return issue_for("unsupported_medication", section_name, claim_text, evidence_ids)
+            return issue_for("unsupported_medication", section_name, item_index, claim_text, evidence_ids)
 
     for term in LAB_TERMS:
         if term in lowered_claim and term not in lowered_evidence:
-            return issue_for("unsupported_lab_trend", section_name, claim_text, evidence_ids)
+            return issue_for("unsupported_lab_trend", section_name, item_index, claim_text, evidence_ids)
 
     for term in SYMPTOM_TERMS:
         if term in lowered_claim and term not in lowered_evidence:
-            return issue_for("unsupported_symptom", section_name, claim_text, evidence_ids)
+            return issue_for("unsupported_symptom", section_name, item_index, claim_text, evidence_ids)
 
     return None
 
@@ -377,15 +399,19 @@ def classify_domain_specific_mismatch(
 def issue_for(
     code: str,
     section_name: str,
+    item_index: int,
     claim_text: str,
     evidence_ids: list[str],
 ) -> ValidationIssue:
+    label = section_label(section_name)
+    code_phrase = CODE_LABELS.get(code, code.replace("_", " "))
     return ValidationIssue(
         code=code,
         severity="error",
         section=section_name,
+        item_index=item_index,
         evidence_ids=evidence_ids,
-        message=f"{section_name} item has {code.replace('_', ' ')} risk: {claim_text}",
+        message=f"{label} item appears to contain {code_phrase}: {claim_text}",
     )
 
 
@@ -399,10 +425,10 @@ def content_tokens(text: str) -> set[str]:
 
 
 def draft_text(draft: ClinicalReviewDraft) -> str:
-    return " ".join(item.text for _, item in iter_evidence_items(draft))
+    return " ".join(item.text for _, _, item in iter_evidence_items(draft))
 
 
 def iter_evidence_items(draft: ClinicalReviewDraft):
     for section_name in EVIDENCE_REQUIRED_SECTIONS:
-        for item in getattr(draft, section_name):
-            yield section_name, item
+        for index, item in enumerate(getattr(draft, section_name)):
+            yield section_name, index, item

@@ -22,7 +22,7 @@ def test_claim_without_evidence_fails():
     result = validate_all(draft=draft, source_spans=spans, raw_text=spans[0].text)
 
     assert not result.is_valid
-    assert any("lacks evidence_ids" in error for error in result.errors)
+    assert any("lacks evidence" in error for error in result.errors)
 
 
 def test_unknown_evidence_id_fails():

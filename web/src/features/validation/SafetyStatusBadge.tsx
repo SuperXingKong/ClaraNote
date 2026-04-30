@@ -12,17 +12,32 @@ const HALLUCINATION_CODES = new Set([
   "unsupported_claim",
 ]);
 
-export function SafetyStatusBadge({ validation }: { validation: ValidationResult | null }) {
+function countByPredicate(
+  issues: ValidationIssue[],
+  predicate: (issue: ValidationIssue) => boolean,
+): number {
+  return issues.filter(predicate).length;
+}
+
+function summarize(validation: ValidationResult) {
+  return {
+    hallucination: countByPredicate(validation.issues, (i) => HALLUCINATION_CODES.has(i.code)),
+    omission: countByPredicate(validation.issues, (i) => i.code === "omission"),
+    unsafe: countByPredicate(validation.issues, (i) => i.code === "unsupported_recommendation"),
+    ambiguity: countByPredicate(validation.issues, (i) => i.code === "incorrect_temporality"),
+  };
+}
+
+export function SafetyStatusBadge({
+  validation,
+  variant = "compact",
+}: {
+  validation: ValidationResult | null;
+  variant?: "compact" | "detailed";
+}) {
   if (!validation) {
     return <Badge tone="neutral">Not run</Badge>;
   }
-
-  const hallucinationCount = countIssues(validation.issues, (issue) =>
-    HALLUCINATION_CODES.has(issue.code),
-  );
-  const omissionCount = countIssues(validation.issues, (issue) => issue.code === "omission");
-  const unsafeCount = countIssues(validation.issues, (issue) => issue.code === "unsupported_recommendation");
-  const ambiguityCount = countIssues(validation.issues, (issue) => issue.code === "incorrect_temporality");
 
   if (validation.is_valid) {
     return (
@@ -33,23 +48,39 @@ export function SafetyStatusBadge({ validation }: { validation: ValidationResult
     );
   }
 
+  const counts = summarize(validation);
+  const totalCategoryIssues =
+    counts.hallucination + counts.omission + counts.unsafe + counts.ambiguity;
+
+  if (variant === "compact") {
+    return (
+      <Badge tone="blocked">
+        <ShieldAlert aria-hidden="true" size={14} />
+        Needs review{totalCategoryIssues > 0 ? ` · ${totalCategoryIssues}` : ""}
+      </Badge>
+    );
+  }
+
   return (
     <div className="flex flex-wrap gap-2">
       <Badge tone="blocked">
         <ShieldAlert aria-hidden="true" size={14} />
         Needs review
       </Badge>
-      <Badge tone={hallucinationCount ? "blocked" : "neutral"}>Hallucination {hallucinationCount}</Badge>
-      <Badge tone={omissionCount ? "warning" : "neutral"}>Omission {omissionCount}</Badge>
-      <Badge tone={unsafeCount ? "blocked" : "neutral"}>Unsafe {unsafeCount}</Badge>
-      <Badge tone={ambiguityCount ? "warning" : "neutral"}>
-        <AlertTriangle aria-hidden="true" size={14} />
-        Ambiguity {ambiguityCount}
-      </Badge>
+      {counts.hallucination > 0 && (
+        <Badge tone="blocked">Hallucination {counts.hallucination}</Badge>
+      )}
+      {counts.unsafe > 0 && <Badge tone="blocked">Unsafe {counts.unsafe}</Badge>}
+      {counts.omission > 0 && <Badge tone="warning">Omission {counts.omission}</Badge>}
+      {counts.ambiguity > 0 && (
+        <Badge tone="warning">
+          <AlertTriangle aria-hidden="true" size={14} />
+          Ambiguity {counts.ambiguity}
+        </Badge>
+      )}
+      {totalCategoryIssues === 0 && (
+        <Badge tone="warning">{validation.issues.length} other issue{validation.issues.length === 1 ? "" : "s"}</Badge>
+      )}
     </div>
   );
-}
-
-function countIssues(issues: ValidationIssue[], predicate: (issue: ValidationIssue) => boolean) {
-  return issues.filter(predicate).length;
 }

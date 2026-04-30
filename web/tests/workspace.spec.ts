@@ -49,7 +49,7 @@ test("runs assignment sample and highlights evidence", async ({ page }) => {
   await expect(page.getByRole("button", { name: /S3 Fasting glucose/ })).toBeVisible();
 });
 
-test("records frontend-only review decisions", async ({ page }) => {
+test("submits review decisions to backend", async ({ page }) => {
   await page.goto("/");
 
   await page.getByRole("button", { name: "Load sample" }).click();

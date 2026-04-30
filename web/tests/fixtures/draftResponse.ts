@@ -33,7 +33,7 @@ export const mockDraftResponse: DraftResponse = {
         text: "58-year-old female with type 2 diabetes and hyperlipidemia.",
         evidence_ids: ["S1"],
         confidence: "high",
-        requires_clinician_review: true,
+        requires_clinician_review: false,
       },
     ],
     trends: [
@@ -77,7 +77,8 @@ export const mockDraftResponse: DraftResponse = {
     issues: [],
   },
   metadata: {
-    prompt_version: "clinical-review-v1",
+    draft_id: "test-draft-id",
+    prompt_version: "clinical-review-v2",
     model_version: "mock-clinical-review-v1",
     llm_provider: "mock",
   },

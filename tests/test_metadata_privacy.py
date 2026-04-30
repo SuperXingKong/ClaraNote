@@ -6,9 +6,19 @@ from clinical_ai.app.schemas import ClinicianReviewRecord
 def test_response_includes_prompt_and_model_metadata():
     response = DraftPipeline().process("58-year-old female with type 2 diabetes.")
 
-    assert response.metadata.prompt_version == "clinical-review-v1"
+    assert response.metadata.prompt_version == "clinical-review-v2"
     assert response.metadata.llm_provider == "mock"
     assert response.metadata.model_version == "mock-clinical-review-v1"
+
+
+def test_each_response_has_a_unique_draft_id():
+    pipeline = DraftPipeline()
+    first = pipeline.process("58-year-old female with type 2 diabetes.")
+    second = pipeline.process("58-year-old female with type 2 diabetes.")
+
+    assert first.metadata.draft_id
+    assert second.metadata.draft_id
+    assert first.metadata.draft_id != second.metadata.draft_id
 
 
 def test_clinician_review_record_accepts_reason_codes():

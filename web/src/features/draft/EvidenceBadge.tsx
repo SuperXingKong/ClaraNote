@@ -22,7 +22,10 @@ export function EvidenceBadge({
                 ? "border-blue-700 bg-blue-700 text-white"
                 : "border-evidence-border bg-evidence-bg text-blue-800 hover:bg-blue-100",
             )}
-            onClick={() => onSelect(evidenceId)}
+            onClick={(event) => {
+              event.stopPropagation();
+              onSelect(evidenceId);
+            }}
             type="button"
           >
             {evidenceId}

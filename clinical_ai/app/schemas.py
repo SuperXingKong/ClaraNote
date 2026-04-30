@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from enum import Enum
 from typing import Any, Literal
 from datetime import datetime, timezone
 
@@ -28,11 +27,6 @@ HallucinationCategory = Literal[
     "unsupported_claim",
     "omission",
 ]
-
-
-class InputType(str, Enum):
-    PLAIN_TEXT = "plain_text"
-    FHIR_BUNDLE = "fhir_bundle"
 
 
 class DraftRequest(BaseModel):
@@ -74,8 +68,14 @@ class ValidationResult(BaseModel):
 
 
 class ResponseMetadata(BaseModel):
+    draft_id: str
     prompt_version: str
     model_version: str
+    llm_provider: str
+
+
+class HealthResponse(BaseModel):
+    status: Literal["ok"]
     llm_provider: str
 
 
@@ -84,6 +84,7 @@ class ValidationIssue(BaseModel):
     severity: IssueSeverity
     message: str
     section: str | None = None
+    item_index: int | None = None
     evidence_ids: list[str] = Field(default_factory=list)
 
 
