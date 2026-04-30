@@ -11,4 +11,5 @@ def test_healthz_reports_status_and_provider():
     assert response.status_code == 200
     payload = response.json()
     assert payload["status"] == "ok"
-    assert payload["llm_provider"] in {"mock", "openai"}
+    assert payload["llm_provider"] == "openai"
+    assert isinstance(payload["openai_key_configured"], bool)

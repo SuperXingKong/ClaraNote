@@ -75,7 +75,8 @@ class ResponseMetadata(BaseModel):
 
 class HealthResponse(BaseModel):
     status: Literal["ok"]
-    llm_provider: str
+    llm_provider: Literal["openai"]
+    openai_key_configured: bool
 
 
 class ValidationIssue(BaseModel):

@@ -106,7 +106,13 @@ def evaluate_golden_cases(
     cases: list[GoldenCase] | None = None,
     review_records: list[ClinicianReviewRecord] | None = None,
 ) -> EvaluationRunResult:
-    pipeline = pipeline or DraftPipeline()
+    if pipeline is None:
+        # Lazy import to avoid pulling the OpenAI client into module import
+        # paths that don't need it (e.g. tests that build their own pipeline).
+        from clinical_ai.app.api import create_llm_client
+        from clinical_ai.app.config import get_settings
+
+        pipeline = DraftPipeline(llm_client=create_llm_client(get_settings()))
     cases = cases or DEFAULT_GOLDEN_CASES
 
     responses = [(case, pipeline.process(case.raw_text)) for case in cases]

@@ -16,7 +16,7 @@ For the AI Engineer assignment review, the four deliverables are:
 |---|---|---|
 | 1 | Prompt | [`clinical_ai/app/prompt.py`](clinical_ai/app/prompt.py) |
 | 2 | Output structure | [`clinical_ai/app/schemas.py`](clinical_ai/app/schemas.py) (`ClinicalReviewDraft`) |
-| 3 | Sample output | [`samples/assignment_output.openai.json`](samples/assignment_output.openai.json) (real `gpt-5.4`) and [`samples/assignment_output.mock.json`](samples/assignment_output.mock.json) (deterministic) |
+| 3 | Sample output | [`samples/assignment_output.openai.json`](samples/assignment_output.openai.json) (real `gpt-5.4`) plus two failure-case samples in [`samples/`](samples/) |
 | 4 | Failure modes & write-up | [`WRITEUP.md`](WRITEUP.md) |
 
 ## Run with Docker (recommended)
@@ -27,8 +27,9 @@ The repository ships with a two-service compose stack:
 - `web` — Vite-built SPA served by Nginx on port `8080` (overridable). Nginx reverse-proxies `/api/...` to the backend over the compose network so the browser only ever talks to the web container.
 
 ```bash
-# 1. (Optional) override defaults
+# 1. Configure OpenAI key (required — there is no mock provider)
 cp .env.example .env
+# edit .env and set OPENAI_API_KEY=sk-...
 
 # 2. Build images and start the stack
 docker compose up -d --build
@@ -37,15 +38,16 @@ docker compose up -d --build
 xdg-open http://localhost:8080   # or just visit it in your browser
 ```
 
-Health checks:
+Health checks (do not require an OpenAI key):
 
 ```bash
 curl http://localhost:8080/healthz          # web (nginx)
-curl http://localhost:8080/api/healthz      # backend via reverse-proxy
+curl http://localhost:8080/api/healthz      # backend via reverse-proxy → reports openai_key_configured
 curl http://127.0.0.1:8000/healthz          # backend direct (loopback only)
 ```
 
-To enable the OpenAI-backed provider, populate `.env` with `LLM_PROVIDER=openai` and `OPENAI_API_KEY=...`, then `docker compose up -d --build` again. Without those, the stack runs the deterministic `MockLLMClient` and needs no API key.
+`POST /v1/drafts` and `POST /v1/drafts/fhir` will fail fast with
+`OpenAIConfigurationError` if `OPENAI_API_KEY` is not set.
 
 Tear down:
 
@@ -72,41 +74,30 @@ npm run dev          # http://127.0.0.1:5173, talks to backend at 127.0.0.1:8000
 PowerShell equivalent for the backend env vars:
 
 ```powershell
-$env:LLM_PROVIDER="openai"
 $env:OPENAI_API_KEY="your_api_key_here"
 uvicorn clinical_ai.app.main:app --reload
 ```
 
 ## Test an OpenAI API key
 
-The MVP keeps `MockLLMClient` as the default local provider. To test a real OpenAI key explicitly:
+OpenAI is the only LLM provider — `OPENAI_API_KEY` is required to generate drafts.
+You can sanity-check the key without spending tokens on a draft:
 
 ```bash
 export OPENAI_API_KEY="your_api_key_here"
 python -m clinical_ai.app.openai_key_test
 ```
 
-The default model is `gpt-5.4`. Override it with either:
+The default model is `gpt-5.4`. Override:
 
 ```bash
 export OPENAI_MODEL="gpt-5.4"
 python -m clinical_ai.app.openai_key_test --model gpt-5.4
 ```
 
-The key test uses the OpenAI Responses API for a tiny connectivity request. The OpenAI-backed draft client also requests structured JSON output and still passes the result through the local Pydantic and safety validators.
-
-## Run with OpenAI-backed drafts
-
-The backend uses the deterministic mock provider by default. To run the local API with a real OpenAI provider, set the key only in the local process environment and do not commit it:
-
-```bash
-export OPENAI_API_KEY="your_api_key_here"
-export LLM_PROVIDER="openai"
-export OPENAI_MODEL="gpt-5.4"
-uvicorn clinical_ai.app.main:app --reload
-```
-
-Without `LLM_PROVIDER=openai`, the running API will continue to use `MockLLMClient` even when `OPENAI_API_KEY` is set.
+The key test uses the OpenAI Responses API for a tiny connectivity request. The
+OpenAI-backed draft client also requests structured JSON output and still passes
+the result through the local Pydantic and safety validators.
 
 ### Model selection
 
@@ -132,7 +123,12 @@ This calls the Responses API once with `max_output_tokens=16` and prints
 
 ## Test
 
+Tests that exercise the LLM pipeline call the real OpenAI API. They are
+auto-skipped when `OPENAI_API_KEY` is absent so validator-only tests still
+run offline.
+
 ```bash
+export OPENAI_API_KEY=sk-...   # required for full coverage; otherwise some tests skip
 pytest
 ```
 
@@ -243,7 +239,10 @@ Done:
 
 ## MVP Scope
 
-The default `MockLLMClient` is deterministic and designed for local testing without an API key. Replace it with a real provider behind the `LLMClient` protocol when integrating an actual model.
+The MVP runs against the OpenAI Responses API. The `LLMClient` Protocol in
+[`clinical_ai/app/llm_client.py`](clinical_ai/app/llm_client.py) is the
+extension point for adding additional providers (Anthropic, Gemini, on-prem,
+…) without touching the pipeline.
 
 ## Implemented Extensions: Safety-first Clinical Summarization
 

@@ -27,10 +27,9 @@
                 │
                 ├─► build_prompt                → SYSTEM_INSTRUCTIONS + spans + raw_text
                 │
-                ├─► LLMClient.generate(prompt)  ──┬─► MockLLMClient    (default)
-                │                                 └─► OpenAI Responses API
-                │                                     · strict json_schema
-                │                                     · gpt-5.4 / gpt-5 / gpt-4.1
+                ├─► LLMClient.generate(prompt)  ──► OpenAI Responses API
+                │                                   · strict json_schema
+                │                                   · gpt-5.4 / gpt-5 / gpt-4.1
                 │
                 ├─► parse_draft                 (Pydantic validate)
                 │
@@ -97,19 +96,21 @@ Every required minimum field from the brief is present; `evidence_ids` and
 
 ## Deliverable 3 — Sample output
 
-Two reproducible samples for the exact assignment patient summary:
+Three reproducible samples illustrating the happy path and the safety system
+catching real failures (full list in [`samples/README.md`](samples/README.md)):
 
 | File | Provider | Notes |
 |---|---|---|
-| [`samples/assignment_output.mock.json`](samples/assignment_output.mock.json) | Deterministic mock | Same output across machines; used in unit tests. |
-| [`samples/assignment_output.openai.json`](samples/assignment_output.openai.json) | OpenAI `gpt-5.4` via Structured Outputs | Real-model output; passes the safety reviewer. |
+| [`samples/assignment_output.openai.json`](samples/assignment_output.openai.json) | OpenAI `gpt-5.4` via Structured Outputs | Happy path on the assignment patient summary; passes the safety reviewer. |
+| [`samples/assignment_output.privacy_blocked.json`](samples/assignment_output.privacy_blocked.json) | (no LLM call) | Pre-LLM privacy gate blocks PHI; `draft` is `null`. |
+| [`samples/assignment_output.unsafe_directive_blocked.json`](samples/assignment_output.unsafe_directive_blocked.json) | (constructed) | Safety reviewer catches prescriptive language. |
 
-Both:
-- correctly carry forward HbA1c trend (Jan → March),
-- correctly **decline** to claim a fasting-glucose trend (recency unclear),
-- flag LDL 4.2 mmol/L as a cardiovascular risk in a diabetes context,
-- surface multi-clinic provenance and adherence uncertainty as data-quality issues,
-- cite source spans for every clinical claim.
+The happy-path sample:
+- correctly carries forward the HbA1c trend (Jan → March),
+- correctly **declines** to claim a fasting-glucose trend (recency unclear),
+- flags LDL 4.2 mmol/L as a cardiovascular risk in a diabetes context,
+- surfaces multi-clinic provenance and adherence uncertainty as data-quality issues,
+- cites source spans for every clinical claim.
 
 ## Deliverable 4 — Failure modes, mitigation & validation
 
@@ -145,17 +146,20 @@ rendered in the right-hand panel.
 | **Handles ambiguity and conflicting data** | `validate_ambiguity` (fasting-glucose recency); 9 `OmissionSpec`s; prompt rules 3–4; UI Uncertainties section |
 | **Structures LLM outputs** | Pydantic schema + OpenAI Structured Outputs strict schema; every claim carries evidence IDs + confidence + review flag |
 | **Awareness of failure modes** | 8-category hallucination taxonomy; second-pass safety reviewer; pre-LLM privacy gate; design-control registry at `/v1/design-controls` mapping each safeguard to FDA/WHO/HL7/NIST/HHS/W3C/CHAI references |
-| **Safe, reliable systems** | Two-stage validation (Pydantic + safety reviewer); deterministic mock fallback; redacted JSONL audit trail with retention; Dockerised reproducible deployment with `/healthz` |
+| **Safe, reliable systems** | Two-stage validation (Pydantic + safety reviewer); redacted JSONL audit trail with retention; Dockerised reproducible deployment with `/healthz` |
 
 ## Implementation notes
 
 - **Reproducible deployment:** `docker compose up -d --build` brings up the
   backend (FastAPI/uvicorn) + frontend (Vite/Nginx with `/api/*` reverse-proxy).
-  Defaults to the deterministic mock provider — no API key required to demo.
-  Set `LLM_PROVIDER=openai` + `OPENAI_API_KEY` in `.env` to use `gpt-5.4`.
-- **Tests:** `pytest` runs 41 backend tests (privacy gate, evidence validation,
-  ambiguity, omissions, FHIR adapter, review store retention, evaluation API,
-  schema, OpenAI client). Frontend builds with `tsc -b && vite build`.
+  Set `OPENAI_API_KEY` in `.env` (the only LLM provider is OpenAI; there is no
+  mock fallback). `/healthz` remains reachable without a key and reports
+  `openai_key_configured: bool`.
+- **Tests:** `pytest` covers the privacy gate, evidence validation, ambiguity,
+  omissions, FHIR adapter, review store retention, evaluation, healthz, schema.
+  Tests that exercise the LLM pipeline call the **real OpenAI API**; they
+  auto-skip when `OPENAI_API_KEY` is absent. Frontend builds with
+  `tsc -b && vite build`.
 - **Live UI:** open <http://localhost:8090> after `docker compose up`. Click
   any "Detected issues" card on the right to highlight the offending draft
   item in the centre column.
@@ -171,7 +175,7 @@ conscious trade-off, not an oversight.
 | **Lexical evidence checker** | NLI / clinically-tuned entailment model | Reviewable in ~50 lines, deterministic, zero extra dependency, easy to unit-test. Documented limitation: over-flags e.g. *"diabetes-related labs"* citing a span that only contains HbA1c. **Next step is not "switch to NLI" — it's an alias table** (`diabetes ↔ hba1c, glucose`) which removes 80 % of the false positives at zero inference cost. |
 | **9 hard-coded `OmissionSpec`s for the assignment patient** | Generic LLM-judge omission scorer | The assignment provides an explicit input. Hard-coded specs let me ship a deterministic golden set and CI test in a day. A judge LLM would inflate cost and add a second source of hallucination. The generic case is the next iteration. |
 | **JSONL audit log on a Docker volume** | SQLite / Postgres / cloud DB | The MVP is a single-tenant local prototype. JSONL is `cat`-able for debugging, easy to redact, easy to back up, and the retention purge is one function. A real deployment would swap this for an authenticated, multi-tenant store before ever touching PHI. |
-| **Mock LLM client as the default provider** | Always require `OPENAI_API_KEY` | Reviewers can `docker compose up -d` and demo the full UI without paying or signing up. Tests run offline. The same `LLMClient` Protocol means the OpenAI client is a one-line swap. |
+| **OpenAI as the only LLM provider** | Keep a deterministic mock as a fallback for offline demos | Reviewers should see what the real model produces, not a hand-tuned facsimile. A `LLMClient` Protocol still exists so a future Anthropic / on-prem provider is a one-line swap. Tests call the real API too (auto-skipped if `OPENAI_API_KEY` is absent). |
 | **Per-item `requires_clinician_review`** is a UI hint, not a safety gate | Treat every `false` as an error | The whole-draft `safety_note` is the gate. Treating per-item `false` as an error caused over-reporting on benign demographics (`58-year-old female...`). The UI now folds `false` items via `<details>` so cognitive load drops on routine items while inferred / risky items stay visible. |
 | **No LangChain / no agent framework** | LangChain or Pydantic AI for orchestration | The flow is linear (prompt → LLM → parse → validate → return). A framework adds an abstraction without removing any of the validation code. I'd reach for one when I need tool calling, retrieval, or multi-step planning. |
 | **Frontend: no client-side state library beyond TanStack Query** | Redux / Zustand / Jotai | Three top-level state items (`draftResponse`, `selectedItemKey`, `reviews`) live in `useState`. A store would be ceremony. |

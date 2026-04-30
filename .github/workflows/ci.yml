@@ -14,6 +14,12 @@ jobs:
   backend:
     name: Backend (pytest + ruff)
     runs-on: ubuntu-latest
+    env:
+      # Pipeline-using tests call the real OpenAI API. The fixture in
+      # tests/conftest.py skips those tests when this secret is absent so
+      # forks / draft PRs without the secret can still run validator tests.
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      OPENAI_MODEL: ${{ vars.OPENAI_MODEL || 'gpt-5.4' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -33,9 +39,6 @@ jobs:
 
       - name: Test (pytest)
         run: pytest -q
-
-      - name: Smoke-run evaluation CLI
-        run: python -m clinical_ai.app.evaluate | head -20
 
   frontend:
     name: Frontend (tsc + vite build)
@@ -72,17 +75,18 @@ jobs:
       - name: Build images
         run: docker compose build
 
-      - name: Smoke-run mock-provider stack
+      - name: Smoke-run stack (healthz only — does not consume LLM tokens)
         env:
           WEB_PORT: "8090"
+          # /healthz is reachable without an OpenAI key. The endpoint reports
+          # whether a key is configured; we simply assert it responds 200.
+          OPENAI_API_KEY: ""
         run: |
           docker compose up -d
           for i in {1..30}; do
             if curl -fsS http://127.0.0.1:8090/api/healthz; then echo; break; fi
             sleep 2
           done
-          curl -fsS -X POST http://127.0.0.1:8090/api/v1/drafts \
-            -H 'content-type: application/json' \
-            -d '{"raw_text":"58-year-old female with type 2 diabetes."}' \
-            | python -c "import json,sys; d=json.load(sys.stdin); assert d['metadata']['draft_id']; print('draft_id ok:', d['metadata']['draft_id'])"
+          curl -fsS http://127.0.0.1:8090/api/healthz \
+            | python -c "import json,sys; d=json.load(sys.stdin); assert d['status']=='ok' and d['llm_provider']=='openai'; print('healthz ok:', d)"
           docker compose down -v

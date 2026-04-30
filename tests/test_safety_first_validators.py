@@ -1,4 +1,3 @@
-from clinical_ai.app.pipeline import DraftPipeline
 from clinical_ai.app.schemas import ClinicalReviewDraft, EvidenceBackedItem, SourceSpan
 from clinical_ai.app.validators import validate_all
 
@@ -44,8 +43,8 @@ def test_assignment_omission_checker_catches_missing_ldl():
     assert any(issue.code == "omission" for issue in result.issues)
 
 
-def test_pipeline_can_return_redacted_debug_payload():
-    response = DraftPipeline().process(
+def test_pipeline_can_return_redacted_debug_payload(openai_pipeline):
+    response = openai_pipeline.process(
         "58-year-old female with type 2 diabetes.",
         include_debug=True,
     )

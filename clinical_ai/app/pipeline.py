@@ -4,7 +4,7 @@ import re
 import uuid
 from dataclasses import dataclass
 
-from clinical_ai.app.llm_client import LLMClient, MockLLMClient
+from clinical_ai.app.llm_client import LLMClient
 from clinical_ai.app.privacy import detect_direct_identifiers, redact_payload, redact_text
 from clinical_ai.app.prompt import PROMPT_VERSION, build_prompt
 from clinical_ai.app.safety_reviewer import SecondPassSafetyReviewer
@@ -28,8 +28,8 @@ class LineUnit:
 
 
 class DraftPipeline:
-    def __init__(self, llm_client: LLMClient | None = None) -> None:
-        self.llm_client = llm_client or MockLLMClient()
+    def __init__(self, llm_client: LLMClient) -> None:
+        self.llm_client = llm_client
         self.safety_reviewer = SecondPassSafetyReviewer()
 
     def process(self, raw_text: str, include_debug: bool = False) -> DraftResponse:

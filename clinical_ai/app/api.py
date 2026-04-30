@@ -10,7 +10,6 @@ from clinical_ai.app.evaluation import (
     generate_assignment_report,
 )
 from clinical_ai.app.fhir_adapter import fhir_bundle_to_text
-from clinical_ai.app.llm_client import MockLLMClient
 from clinical_ai.app.openai_client import OpenAIClinicalReviewClient
 from clinical_ai.app.pipeline import DraftPipeline
 from clinical_ai.app.review_store import JsonlReviewStore
@@ -26,14 +25,21 @@ from clinical_ai.app.schemas import (
 )
 
 router = APIRouter()
-def create_llm_client(settings: Settings):
-    if settings.llm_provider == "openai":
-        return OpenAIClinicalReviewClient(
-            api_key=settings.openai_api_key,
-            model=settings.openai_model,
-            timeout_seconds=settings.openai_timeout_seconds,
-        )
-    return MockLLMClient()
+
+
+def create_llm_client(settings: Settings) -> OpenAIClinicalReviewClient:
+    """Build the OpenAI-backed LLM client.
+
+    The constructor is non-strict about an absent API key — the key is only
+    consulted on the first `generate()` call. This keeps `/healthz` reachable
+    without an API key, but actual draft requests will fail fast with a clear
+    `OpenAIConfigurationError` if `OPENAI_API_KEY` is not set.
+    """
+    return OpenAIClinicalReviewClient(
+        api_key=settings.openai_api_key,
+        model=settings.openai_model,
+        timeout_seconds=settings.openai_timeout_seconds,
+    )
 
 
 pipeline = DraftPipeline(llm_client=create_llm_client(get_settings()))
@@ -43,7 +49,11 @@ review_store = JsonlReviewStore()
 @router.get("/healthz", response_model=HealthResponse)
 async def healthz() -> HealthResponse:
     settings = get_settings()
-    return HealthResponse(status="ok", llm_provider=settings.llm_provider)
+    return HealthResponse(
+        status="ok",
+        llm_provider="openai",
+        openai_key_configured=bool(settings.openai_api_key),
+    )
 
 
 @router.post("/v1/drafts", response_model=DraftResponse)
