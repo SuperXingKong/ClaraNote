@@ -1,0 +1,65 @@
+{
+  "draft": null,
+  "source_spans": [
+    {
+      "id": "S1",
+      "text": "[REDACTED_NAME]",
+      "start": 0,
+      "end": 15
+    },
+    {
+      "id": "S2",
+      "text": "[REDACTED_MRN]",
+      "start": 16,
+      "end": 30
+    },
+    {
+      "id": "S3",
+      "text": "Email: [REDACTED_EMAIL]",
+      "start": 31,
+      "end": 54
+    },
+    {
+      "id": "S4",
+      "text": "Phone: +[REDACTED_PHONE]",
+      "start": 55,
+      "end": 79
+    },
+    {
+      "id": "S5",
+      "text": "58-year-old female with type 2 diabetes.",
+      "start": 80,
+      "end": 120
+    },
+    {
+      "id": "S6",
+      "text": "HbA1c: 7.8%.",
+      "start": 121,
+      "end": 133
+    }
+  ],
+  "validation": {
+    "is_valid": false,
+    "errors": [
+      "Potential direct identifiers detected before LLM processing: patient name, email address, phone number, medical record number. Remove or de-identify identifiers before generating a draft."
+    ],
+    "warnings": [],
+    "issues": [
+      {
+        "code": "privacy_direct_identifier",
+        "severity": "error",
+        "message": "Potential direct identifiers detected before LLM processing: patient name, email address, phone number, medical record number. Remove or de-identify identifiers before generating a draft.",
+        "section": null,
+        "item_index": null,
+        "evidence_ids": []
+      }
+    ]
+  },
+  "metadata": {
+    "draft_id": "sample-privacy-gate-blocked",
+    "prompt_version": "clinical-review-v2",
+    "model_version": "gpt-5.4",
+    "llm_provider": "openai"
+  },
+  "debug": null
+}

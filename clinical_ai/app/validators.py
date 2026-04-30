@@ -12,7 +12,6 @@ from clinical_ai.app.schemas import (
     ValidationResult,
 )
 
-
 SAFETY_PATTERNS = [
     r"\bdiagnose\b",
     r"\bprescribe\b",

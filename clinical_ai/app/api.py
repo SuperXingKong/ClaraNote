@@ -25,7 +25,6 @@ from clinical_ai.app.schemas import (
     ReviewSubmissionResponse,
 )
 
-
 router = APIRouter()
 def create_llm_client(settings: Settings):
     if settings.llm_provider == "openai":

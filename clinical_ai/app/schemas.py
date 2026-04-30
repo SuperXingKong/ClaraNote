@@ -1,10 +1,9 @@
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from typing import Any, Literal
-from datetime import datetime, timezone
 
 from pydantic import BaseModel, Field
-
 
 Confidence = Literal["low", "medium", "high"]
 ReviewDecision = Literal["accept", "edit", "reject"]
@@ -107,7 +106,7 @@ class ClinicianReviewRecord(BaseModel):
     reason_codes: list[ReviewReasonCode] = Field(default_factory=list)
     edited_text: str | None = None
     comments: str | None = None
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 class ReviewSubmissionRequest(BaseModel):

@@ -5,8 +5,8 @@ import uuid
 from dataclasses import dataclass
 
 from clinical_ai.app.llm_client import LLMClient, MockLLMClient
-from clinical_ai.app.prompt import PROMPT_VERSION, build_prompt
 from clinical_ai.app.privacy import detect_direct_identifiers, redact_payload, redact_text
+from clinical_ai.app.prompt import PROMPT_VERSION, build_prompt
 from clinical_ai.app.safety_reviewer import SecondPassSafetyReviewer
 from clinical_ai.app.schemas import (
     DraftDebugInfo,

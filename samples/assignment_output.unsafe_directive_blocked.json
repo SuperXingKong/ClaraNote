@@ -1,0 +1,92 @@
+{
+  "draft": {
+    "key_clinical_summary": [
+      {
+        "text": "LDL is 4.2 mmol/L.",
+        "evidence_ids": [
+          "S1"
+        ],
+        "confidence": "high",
+        "requires_clinician_review": false
+      }
+    ],
+    "trends": [],
+    "risk_flags": [],
+    "uncertainties": [],
+    "suggested_follow_up_areas": [
+      {
+        "text": "Increase atorvastatin dose to 20mg daily.",
+        "evidence_ids": [
+          "S1"
+        ],
+        "confidence": "high",
+        "requires_clinician_review": true
+      },
+      {
+        "text": "Patient should start a beta blocker.",
+        "evidence_ids": [
+          "S1"
+        ],
+        "confidence": "high",
+        "requires_clinician_review": true
+      }
+    ],
+    "safety_note": "Draft for clinician review only."
+  },
+  "source_spans": [
+    {
+      "id": "S1",
+      "text": "LDL: 4.2 mmol/L",
+      "start": 0,
+      "end": 15
+    }
+  ],
+  "validation": {
+    "is_valid": false,
+    "errors": [
+      "Suggested follow-up item may not be supported by its cited evidence: Increase atorvastatin dose to 20mg daily.",
+      "Suggested follow-up item may not be supported by its cited evidence: Patient should start a beta blocker.",
+      "Unsafe directive in Suggested follow-up: Increase atorvastatin dose to 20mg daily."
+    ],
+    "warnings": [],
+    "issues": [
+      {
+        "code": "unsupported_claim",
+        "severity": "error",
+        "message": "Suggested follow-up item may not be supported by its cited evidence: Increase atorvastatin dose to 20mg daily.",
+        "section": "suggested_follow_up_areas",
+        "item_index": 0,
+        "evidence_ids": [
+          "S1"
+        ]
+      },
+      {
+        "code": "unsupported_claim",
+        "severity": "error",
+        "message": "Suggested follow-up item may not be supported by its cited evidence: Patient should start a beta blocker.",
+        "section": "suggested_follow_up_areas",
+        "item_index": 1,
+        "evidence_ids": [
+          "S1"
+        ]
+      },
+      {
+        "code": "unsupported_recommendation",
+        "severity": "error",
+        "message": "Unsafe directive in Suggested follow-up: Increase atorvastatin dose to 20mg daily.",
+        "section": "suggested_follow_up_areas",
+        "item_index": 0,
+        "evidence_ids": [
+          "S1"
+        ]
+      }
+    ]
+  },
+  "metadata": {
+    "draft_id": "sample-unsafe-directive-blocked",
+    "prompt_version": "clinical-review-v2",
+    "model_version": "manual-stress-test",
+    "llm_provider": "manual"
+  },
+  "debug": null
+}

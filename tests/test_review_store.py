@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from fastapi.testclient import TestClient
 
@@ -51,7 +51,7 @@ def test_review_api_persists_records(tmp_path, monkeypatch):
 
 def test_review_store_purges_records_outside_retention_window(tmp_path):
     path = tmp_path / "reviews.jsonl"
-    now = datetime(2026, 4, 27, tzinfo=timezone.utc)
+    now = datetime(2026, 4, 27, tzinfo=UTC)
     old_record = ClinicianReviewRecord(
         draft_id="old",
         item_key="summary-0",
@@ -80,7 +80,7 @@ def test_review_store_can_disable_retention_for_tests(tmp_path):
         draft_id="old",
         item_key="summary-0",
         decision="accept",
-        created_at=datetime(2020, 1, 1, tzinfo=timezone.utc),
+        created_at=datetime(2020, 1, 1, tzinfo=UTC),
     )
     path.write_text(old_record.model_dump_json() + "\n", encoding="utf-8")
     store = JsonlReviewStore(path, retention_days=None)

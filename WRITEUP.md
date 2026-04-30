@@ -4,6 +4,51 @@
 > assignment brief. Implementation lives in [`clinical_ai/`](clinical_ai/) and
 > [`web/`](web/); end-to-end deployment is in [`docker-compose.yml`](docker-compose.yml).
 
+## System overview
+
+```
+            ┌─────────────────────────────────────────────────────────────────┐
+            │                      Browser (Nginx :8090)                      │
+            │  React 19 SPA — input panel · draft sections · validation panel │
+            └───────┬─────────────────────────────────────┬───────────────────┘
+                    │ /api/*  (reverse-proxy)             │ static
+                    ▼                                     ▼
+        ┌───────────────────────────┐            ┌────────────────┐
+        │  FastAPI (uvicorn :8000)  │            │  dist/ (Vite)  │
+        │  api.py: 7 endpoints      │            └────────────────┘
+        └───────┬───────────────────┘
+                │
+                ▼
+   pipeline.process(raw_text)
+                │
+                ├─► detect_direct_identifiers ── PHI? ──► return validation error (NO LLM CALL)
+                │
+                ├─► split_source_spans          (S1, S2, …)
+                │
+                ├─► build_prompt                → SYSTEM_INSTRUCTIONS + spans + raw_text
+                │
+                ├─► LLMClient.generate(prompt)  ──┬─► MockLLMClient    (default)
+                │                                 └─► OpenAI Responses API
+                │                                     · strict json_schema
+                │                                     · gpt-5.4 / gpt-5 / gpt-4.1
+                │
+                ├─► parse_draft                 (Pydantic validate)
+                │
+                ├─► SecondPassSafetyReviewer    → validate_evidence
+                │                                 validate_ambiguity
+                │                                 validate_safety
+                │                                 validate_omissions
+                │
+                └─► DraftResponse {draft, source_spans, validation, metadata}
+
+         Side channel:  POST /v1/reviews ─► JsonlReviewStore (.data/reviews.jsonl, 30-day retention, redacted)
+```
+
+**Trust boundaries.** The privacy gate fires *before* any LLM call, so direct
+identifiers cannot be exfiltrated even if every later layer fails. The safety
+reviewer fires *after* the LLM call, so prescriptive language slipping past
+the prompt still gets caught by deterministic Python.
+
 ## Deliverable 1 — Prompt
 
 [`clinical_ai/app/prompt.py`](clinical_ai/app/prompt.py) — version `clinical-review-v2`.
@@ -115,15 +160,42 @@ rendered in the right-hand panel.
   any "Detected issues" card on the right to highlight the offending draft
   item in the centre column.
 
-## What I would add for production
+## Design trade-offs (deliberate choices)
 
-- Replace lexical evidence checks with an NLI / clinically-tuned entailment
-  reviewer (current rules over-flag e.g. "diabetes-related labs" when the cited
-  span only contains HbA1c).
-- Real clinician-authenticated review storage; current JSONL is a local audit
-  prototype, not a multi-tenant store.
-- Privacy/security/authorization controls before any contact with real PHI.
+These are the decisions where I picked one option over another. Each was a
+conscious trade-off, not an oversight.
+
+| Decision | Alternative considered | Why I chose it |
+|---|---|---|
+| **Two-stage validation** (OpenAI Structured Outputs *and* Pydantic + custom safety reviewer) | Trust Structured Outputs alone | `strict: true` only enforces *shape*. It cannot catch unsafe directives, evidence/claim mismatches, or ambiguity violations. Provider failures (rate limits, version regression, fallback to a different model) also need a defence in depth. Cost: a few ms of CPU per request. |
+| **Lexical evidence checker** | NLI / clinically-tuned entailment model | Reviewable in ~50 lines, deterministic, zero extra dependency, easy to unit-test. Documented limitation: over-flags e.g. *"diabetes-related labs"* citing a span that only contains HbA1c. **Next step is not "switch to NLI" — it's an alias table** (`diabetes ↔ hba1c, glucose`) which removes 80 % of the false positives at zero inference cost. |
+| **9 hard-coded `OmissionSpec`s for the assignment patient** | Generic LLM-judge omission scorer | The assignment provides an explicit input. Hard-coded specs let me ship a deterministic golden set and CI test in a day. A judge LLM would inflate cost and add a second source of hallucination. The generic case is the next iteration. |
+| **JSONL audit log on a Docker volume** | SQLite / Postgres / cloud DB | The MVP is a single-tenant local prototype. JSONL is `cat`-able for debugging, easy to redact, easy to back up, and the retention purge is one function. A real deployment would swap this for an authenticated, multi-tenant store before ever touching PHI. |
+| **Mock LLM client as the default provider** | Always require `OPENAI_API_KEY` | Reviewers can `docker compose up -d` and demo the full UI without paying or signing up. Tests run offline. The same `LLMClient` Protocol means the OpenAI client is a one-line swap. |
+| **Per-item `requires_clinician_review`** is a UI hint, not a safety gate | Treat every `false` as an error | The whole-draft `safety_note` is the gate. Treating per-item `false` as an error caused over-reporting on benign demographics (`58-year-old female...`). The UI now folds `false` items via `<details>` so cognitive load drops on routine items while inferred / risky items stay visible. |
+| **No LangChain / no agent framework** | LangChain or Pydantic AI for orchestration | The flow is linear (prompt → LLM → parse → validate → return). A framework adds an abstraction without removing any of the validation code. I'd reach for one when I need tool calling, retrieval, or multi-step planning. |
+| **Frontend: no client-side state library beyond TanStack Query** | Redux / Zustand / Jotai | Three top-level state items (`draftResponse`, `selectedItemKey`, `reviews`) live in `useState`. A store would be ceremony. |
+| **`gpt-5.4` as default** | Pin to a specific snapshot date | Snapshots fall out of access faster than the rolling alias does. README documents `gpt-5`, `gpt-5-mini`, `gpt-4.1` as drop-in fallbacks for reviewers without `gpt-5.4` access. |
+
+## What I would build next, in order
+
+1. **Synonym table for the lexical evidence checker** (1–2 hours, removes
+   the most visible false positives without changing inference cost).
+2. **NLI-based entailment reviewer** behind a feature flag, A/B'd against
+   the lexical checker on the golden set so the error-rate trade-off is
+   measured, not assumed.
+3. **Clinician-authenticated review storage** — replace the local JSONL with
+   an authenticated multi-tenant store; required before real PHI.
+4. **Cost / latency tests** in CI — record `tokens_in / tokens_out / wall_ms`
+   per golden case so a model swap is measurable.
+5. **Privacy / security / authorization controls** — formal review before any
+   real-PHI contact.
 
 ---
 
-_Hours spent: ~12_ <!-- update before submission -->
+_Hours spent: ~22_ (≈10 h core engine + tests, ≈6 h frontend, ≈3 h
+deployment / Docker, ≈3 h docs + sample outputs). Substantial portions were
+drafted with AI assistance (Claude Code) for boilerplate, refactor mechanics,
+and Tailwind class wiring; design choices, prompt iteration, validator rules,
+and the trade-off table above are mine — happy to walk through any of them
+in interview._

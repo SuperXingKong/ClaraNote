@@ -108,6 +108,28 @@ uvicorn clinical_ai.app.main:app --reload
 
 Without `LLM_PROVIDER=openai`, the running API will continue to use `MockLLMClient` even when `OPENAI_API_KEY` is set.
 
+### Model selection
+
+The default `OPENAI_MODEL` is `gpt-5.4`. The OpenAI client uses the **Responses API**
+with strict JSON Schema (Structured Outputs), which is supported on the
+`gpt-5.x` and `gpt-4.1` families. If your account does not have access to `gpt-5.4`,
+override with any model that supports Structured Outputs:
+
+```bash
+export OPENAI_MODEL="gpt-5"           # most accounts
+export OPENAI_MODEL="gpt-5-mini"      # cheaper, slightly weaker
+export OPENAI_MODEL="gpt-4.1"         # legacy fallback
+```
+
+You can sanity-check connectivity without spending tokens on a draft:
+
+```bash
+python -m clinical_ai.app.openai_key_test --model "$OPENAI_MODEL"
+```
+
+This calls the Responses API once with `max_output_tokens=16` and prints
+`ok` on success.
+
 ## Test
 
 ```bash

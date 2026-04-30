@@ -1,6 +1,5 @@
 from clinical_ai.app.pipeline import split_source_spans
 
-
 ASSIGNMENT_SUMMARY = """
 58-year-old female with history of type 2 diabetes and hyperlipidemia.
 Latest labs (last 2-3 months):

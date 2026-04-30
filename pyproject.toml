@@ -18,6 +18,7 @@ clinical-ai-openai-key-test = "clinical_ai.app.openai_key_test:main"
 dev = [
     "pytest>=8.0.0",
     "httpx>=0.27.0",
+    "ruff>=0.6.0",
 ]
 
 [tool.pytest.ini_options]
@@ -26,3 +27,27 @@ pythonpath = ["."]
 
 [tool.setuptools.packages.find]
 include = ["clinical_ai*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+extend-exclude = [".venv", "build", "dist", "node_modules"]
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "F",    # pyflakes
+    "I",    # isort
+    "B",    # bugbear (likely bugs)
+    "UP",   # pyupgrade
+    "SIM",  # simplify
+    "RUF",  # ruff-specific
+]
+ignore = [
+    "E501",   # line length — handled by formatter when needed
+    "B008",   # function-call-in-default-arg — Pydantic Field() is fine
+    "SIM108", # ternary if-else — readability over conciseness
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["E402"]

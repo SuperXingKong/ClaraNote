@@ -3,7 +3,6 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass
 
-
 DEFAULT_OPENAI_MODEL = "gpt-5.4"
 DEFAULT_OPENAI_TIMEOUT_SECONDS = 30.0
 DEFAULT_LLM_PROVIDER = "mock"

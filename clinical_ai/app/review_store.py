@@ -1,12 +1,11 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from clinical_ai.app.privacy import redact_text
 from clinical_ai.app.schemas import ClinicianReviewRecord, ReviewSubmissionRequest
-
 
 DEFAULT_REVIEW_LOG_PATH = Path(".data/reviews.jsonl")
 DEFAULT_REVIEW_RETENTION_DAYS = 30
@@ -48,7 +47,7 @@ class JsonlReviewStore:
         if self.retention_days is None or not self.path.exists():
             return 0
 
-        current_time = now or datetime.now(timezone.utc)
+        current_time = now or datetime.now(UTC)
         cutoff = current_time - timedelta(days=self.retention_days)
         rows = self._read_all()
         retained = [record for record in rows if record.created_at >= cutoff]

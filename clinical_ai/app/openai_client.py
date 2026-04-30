@@ -64,7 +64,7 @@ class OpenAIClinicalReviewClient:
                 max_output_tokens=16,
             )
             output_text = _extract_output_text(response).strip().lower()
-        except Exception as exc:  # noqa: BLE001 - return a user-safe diagnostic.
+        except Exception as exc:
             return OpenAIKeyTestResult(
                 ok=False,
                 model=self.model,

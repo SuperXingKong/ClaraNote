@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from clinical_ai.app.schemas import DesignControl, DesignReference, DesignControlsResponse
-
+from clinical_ai.app.schemas import DesignControl, DesignControlsResponse, DesignReference
 
 FDA_CDS = DesignReference(
     label="Clinical Decision Support Software Guidance, January 2026",
